@@ -1,6 +1,7 @@
 use crate::Node;
 use accesskit_consumer::{FilterResult, Node as AKNode};
 use std::iter::FusedIterator;
+use crate::query::hidden::IterType;
 
 fn query_by_impl<'tree>(mut iter: impl Iterator<Item = Node<'tree>>) -> Option<Node<'tree>> {
     let result = iter.next();
@@ -70,18 +71,16 @@ pub trait Queryable<'tree, 'node> {
     }
 }
 
-trait IterType<'tree>:
-    Iterator<Item = Node<'tree>>
-    + DoubleEndedIterator<Item = Node<'tree>>
-    + FusedIterator<Item = Node<'tree>>
-{
-}
+mod hidden {
+    use super::*;
+    pub trait IterType<'tree>:
+    DoubleEndedIterator<Item=Node<'tree>> + FusedIterator<Item=Node<'tree>>
+    {}
 
-impl<'tree, T> IterType<'tree> for T where
-    T: Iterator<Item = Node<'tree>>
-        + DoubleEndedIterator<Item = Node<'tree>>
-        + FusedIterator<Item = Node<'tree>>
-{
+    impl<'tree, T> IterType<'tree> for T
+    where
+        T: DoubleEndedIterator<Item=Node<'tree>> + FusedIterator<Item=Node<'tree>>,
+    {}
 }
 
 // TODO: I would like to add the find_by_* methods but I'm not sure how I would update the
