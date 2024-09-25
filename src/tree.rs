@@ -10,7 +10,7 @@ pub struct Tree {
 }
 
 impl Tree {
-    pub fn new(update: TreeUpdate) -> Tree {
+    pub fn new(update: TreeUpdate) -> Self {
         Self {
             tree: accesskit_consumer::Tree::new(update, true),
             queued_events: Mutex::new(Vec::new()),

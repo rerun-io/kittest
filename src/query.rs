@@ -22,8 +22,7 @@ pub trait Queryable<'tree, 'node> {
     fn query_all_by(
         &'node self,
         f: impl Fn(&Node<'_>) -> bool + 'tree,
-    ) -> impl Iterator<Item = Node<'tree>>
-           + DoubleEndedIterator<Item = Node<'tree>>
+    ) -> impl DoubleEndedIterator<Item = Node<'tree>>
            + FusedIterator<Item = Node<'tree>>
            + 'tree {
         let root = self.node();
