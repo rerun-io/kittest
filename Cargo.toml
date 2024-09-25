@@ -1,5 +1,5 @@
 [package]
-authors = ["rerun.io <opensource@rerun.io>"]
+authors = ["Lucas Meurer", "rerun.io <opensource@rerun.io>"]
 categories = []                                                      # TODO: fill in if you plan on publishing the crate
 description = ""                                                     # TODO: fill in if you plan on publishing the crate
 edition = "2021"
@@ -24,13 +24,14 @@ default = []
 
 
 [dependencies]
-
+accesskit_consumer = "0.24.0"
+accesskit = "0.16.0"
 
 [dev-dependencies]
-
+egui = { version = "0.28.1", features = ["accesskit"] }
 
 [patch.crates-io]
-
+egui = { git = "https://github.com/emilk/egui"}
 
 [lints]
 workspace = true
