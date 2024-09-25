@@ -2,12 +2,14 @@ use crate::event::Event;
 use crate::query::Queryable;
 use crate::Node;
 use accesskit::TreeUpdate;
-use std::sync::Mutex;
+use parking_lot::Mutex;
 
 pub struct Tree {
     tree: accesskit_consumer::Tree,
     queued_events: Mutex<Vec<Event>>,
 }
+
+pub(crate) type EventQueue = Mutex<Vec<Event>>;
 
 impl Tree {
     pub fn new(update: TreeUpdate) -> Self {
@@ -26,7 +28,7 @@ impl Tree {
     }
 
     pub fn take_events(&self) -> Vec<Event> {
-        self.queued_events.lock().unwrap().drain(..).collect()
+        self.queued_events.lock().drain(..).collect()
     }
 }
 

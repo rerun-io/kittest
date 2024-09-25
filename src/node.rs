@@ -1,13 +1,13 @@
 use crate::event::{Event, SimulatedEvent};
 use crate::query::Queryable;
+use crate::tree::EventQueue;
 use accesskit::{ActionRequest, Vec2};
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
-use std::sync::Mutex;
 
 pub struct Node<'tree> {
     node: accesskit_consumer::Node<'tree>,
-    pub(crate) queue: &'tree Mutex<Vec<Event>>,
+    pub(crate) queue: &'tree EventQueue,
 }
 
 impl<'a> Debug for Node<'a> {
@@ -44,35 +44,29 @@ impl<'tree> Deref for Node<'tree> {
 }
 
 impl<'tree> Node<'tree> {
-    pub fn new(node: accesskit_consumer::Node<'tree>, queue: &'tree Mutex<Vec<Event>>) -> Self {
+    pub fn new(node: accesskit_consumer::Node<'tree>, queue: &'tree EventQueue) -> Self {
         Self { node, queue }
     }
 
-    pub fn queue<'node>(&'node self) -> &'tree Mutex<Vec<Event>> {
+    pub fn queue<'node>(&'node self) -> &'tree EventQueue {
         self.queue
     }
 
     pub fn focus(&self) {
-        self.queue
-            .lock()
-            .unwrap()
-            .push(Event::ActionRequest(ActionRequest {
-                data: None,
-                action: accesskit::Action::Focus,
-                target: self.node.id(),
-            }));
+        self.queue.lock().push(Event::ActionRequest(ActionRequest {
+            data: None,
+            action: accesskit::Action::Focus,
+            target: self.node.id(),
+        }));
     }
 
     /// Click the node via accesskit
     pub fn click(&self) {
-        self.queue
-            .lock()
-            .unwrap()
-            .push(Event::ActionRequest(ActionRequest {
-                data: None,
-                action: accesskit::Action::Default,
-                target: self.node.id(),
-            }));
+        self.queue.lock().push(Event::ActionRequest(ActionRequest {
+            data: None,
+            action: accesskit::Action::Default,
+            target: self.node.id(),
+        }));
     }
 
     /// Simulate a click event on the node center
@@ -81,17 +75,13 @@ impl<'tree> Node<'tree> {
         let center = Vec2::new(rect.x0 + rect.x1 / 2.0, rect.y0 + rect.y1 / 2.0);
         self.queue
             .lock()
-            .unwrap()
-            .push(Event::Simulated(SimulatedEvent::Click {
-                position: center,
-            }));
+            .push(Event::Simulated(SimulatedEvent::Click { position: center }));
     }
 
     pub fn type_text(&self, text: &str) {
         self.focus();
         self.queue
             .lock()
-            .unwrap()
             .push(Event::Simulated(SimulatedEvent::Type {
                 text: text.to_owned(),
             }));

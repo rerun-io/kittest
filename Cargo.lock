@@ -130,6 +130,7 @@ dependencies = [
  "accesskit",
  "accesskit_consumer",
  "egui",
+ "parking_lot",
 ]
 
 [[package]]

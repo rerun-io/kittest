@@ -26,6 +26,7 @@ default = []
 [dependencies]
 accesskit_consumer = "0.24.0"
 accesskit = "0.16.0"
+parking_lot = "0.12"
 
 [dev-dependencies]
 egui = { version = "0.28.1", features = ["accesskit"] }

@@ -34,7 +34,7 @@ impl<'a> Harness<'a> {
             .map(|e| match e {
                 Event::ActionRequest(action) => egui::Event::AccessKitActionRequest(action),
                 Event::Simulated(_) => {
-                    unimplemented!("Check egui_kittest for a full implementation");
+                    todo!("Check egui_kittest for a full implementation");
                 }
             })
             .collect();
@@ -79,5 +79,5 @@ fn main() {
 
     drop(harness);
 
-    assert!(checked);
+    assert!(checked, "Should be checked");
 }

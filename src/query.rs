@@ -22,9 +22,7 @@ pub trait Queryable<'tree, 'node> {
     fn query_all_by(
         &'node self,
         f: impl Fn(&Node<'_>) -> bool + 'tree,
-    ) -> impl DoubleEndedIterator<Item = Node<'tree>>
-           + FusedIterator<Item = Node<'tree>>
-           + 'tree {
+    ) -> impl IterType<'tree> + 'tree {
         let root = self.node();
         let queue = root.queue();
         root.filtered_children(move |node: &AKNode<'_>| {
