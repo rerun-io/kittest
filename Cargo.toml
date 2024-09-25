@@ -3,14 +3,14 @@ authors = ["rerun.io <opensource@rerun.io>"]
 categories = []                                                      # TODO: fill in if you plan on publishing the crate
 description = ""                                                     # TODO: fill in if you plan on publishing the crate
 edition = "2021"
-homepage = "https://github.com/rerun-io/new_repo_name"
+homepage = "https://github.com/rerun-io/kittest"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
 keywords = []                                                        # TODO: fill in if you plan on publishing the crate
 license = "MIT OR Apache-2.0"
-name = "new_project_name"
+name = "kittest"
 publish = false                                                      # TODO: set to `true` if you plan on publishing the crate
 readme = "README.md"
-repository = "https://github.com/rerun-io/new_repo_name"
+repository = "https://github.com/rerun-io/kittest"
 rust-version = "1.76"
 version = "0.1.0"
 
