@@ -32,7 +32,7 @@ parking_lot = "0.12"
 egui = { version = "0.28.1", features = ["accesskit"] }
 
 [patch.crates-io]
-egui = { git = "https://github.com/emilk/egui"}
+egui = { git = "https://github.com/emilk/egui", rev = "dae1979dd334ace310b6e3ef02e98281ed7dfb8e" }
 
 [lints]
 workspace = true

@@ -73,7 +73,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 [[package]]
 name = "ecolor"
 version = "0.28.1"
-source = "git+https://github.com/emilk/egui#5d46f67f7911c91be556e2a3d4583479c309a766"
+source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
 dependencies = [
  "emath",
 ]
@@ -81,7 +81,7 @@ dependencies = [
 [[package]]
 name = "egui"
 version = "0.28.1"
-source = "git+https://github.com/emilk/egui#5d46f67f7911c91be556e2a3d4583479c309a766"
+source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
 dependencies = [
  "accesskit",
  "ahash",
@@ -93,12 +93,12 @@ dependencies = [
 [[package]]
 name = "emath"
 version = "0.28.1"
-source = "git+https://github.com/emilk/egui#5d46f67f7911c91be556e2a3d4583479c309a766"
+source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
 
 [[package]]
 name = "epaint"
 version = "0.28.1"
-source = "git+https://github.com/emilk/egui#5d46f67f7911c91be556e2a3d4583479c309a766"
+source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
 dependencies = [
  "ab_glyph",
  "ahash",
@@ -112,7 +112,7 @@ dependencies = [
 [[package]]
 name = "epaint_default_fonts"
 version = "0.28.1"
-source = "git+https://github.com/emilk/egui#5d46f67f7911c91be556e2a3d4583479c309a766"
+source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
 
 [[package]]
 name = "immutable-chunkmap"
