@@ -1,14 +1,14 @@
 [package]
 authors = ["Lucas Meurer", "rerun.io <opensource@rerun.io>"]
-categories = []                                                      # TODO: fill in if you plan on publishing the crate
-description = ""                                                     # TODO: fill in if you plan on publishing the crate
+categories = ["gui", "development-tools::testing", "accessibility"]
+description = "Automated GUI testing using AccessKit"
 edition = "2021"
 homepage = "https://github.com/rerun-io/kittest"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
-keywords = []                                                        # TODO: fill in if you plan on publishing the crate
+keywords = ["gui", "testing", "accessibility", "egui", "accesskit"]
 license = "MIT OR Apache-2.0"
 name = "kittest"
-publish = false                                                      # TODO: set to `true` if you plan on publishing the crate
+publish = true
 readme = "README.md"
 repository = "https://github.com/rerun-io/kittest"
 rust-version = "1.76"

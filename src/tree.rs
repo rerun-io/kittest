@@ -4,6 +4,7 @@ use crate::Node;
 use accesskit::TreeUpdate;
 use parking_lot::Mutex;
 
+/// The kittest state
 pub struct State {
     tree: accesskit_consumer::Tree,
     queued_events: Mutex<Vec<Event>>,
@@ -12,6 +13,7 @@ pub struct State {
 pub(crate) type EventQueue = Mutex<Vec<Event>>;
 
 impl State {
+    /// Create a new State from a `TreeUpdate`
     pub fn new(update: TreeUpdate) -> Self {
         Self {
             tree: accesskit_consumer::Tree::new(update, true),
@@ -19,14 +21,17 @@ impl State {
         }
     }
 
+    /// Update the state with a new `TreeUpdate` (this should be called after each frame)
     pub fn update(&mut self, update: accesskit::TreeUpdate) {
         self.tree.update(update);
     }
 
+    /// Get the root node
     pub fn root(&self) -> Node<'_> {
         self.node()
     }
 
+    /// Take all queued events. (These should then be passed to the UI framework)
     pub fn take_events(&self) -> Vec<Event> {
         self.queued_events.lock().drain(..).collect()
     }

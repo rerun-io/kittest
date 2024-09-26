@@ -5,6 +5,7 @@ use accesskit::{ActionRequest, Vec2};
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
 
+/// A node in the accessibility tree. This should correspond to a widget or container in the GUI
 pub struct Node<'tree> {
     node: accesskit_consumer::Node<'tree>,
     pub(crate) queue: &'tree EventQueue,
@@ -44,14 +45,16 @@ impl<'tree> Deref for Node<'tree> {
 }
 
 impl<'tree> Node<'tree> {
-    pub fn new(node: accesskit_consumer::Node<'tree>, queue: &'tree EventQueue) -> Self {
+    /// Create a new node from an [`accesskit_consumer::Node`] and an [`EventQueue`]
+    pub(crate) fn new(node: accesskit_consumer::Node<'tree>, queue: &'tree EventQueue) -> Self {
         Self { node, queue }
     }
 
-    pub fn queue<'node>(&'node self) -> &'tree EventQueue {
+    pub(crate) fn queue<'node>(&'node self) -> &'tree EventQueue {
         self.queue
     }
 
+    /// Request focus for the node via accesskit
     pub fn focus(&self) {
         self.queue.lock().push(Event::ActionRequest(ActionRequest {
             data: None,
@@ -69,7 +72,7 @@ impl<'tree> Node<'tree> {
         }));
     }
 
-    /// Simulate a click event on the node center
+    /// Simulate a click event at the node center
     pub fn simulate_click(&self) {
         let rect = self.node.raw_bounds().expect("Node has no bounds");
         let center = Vec2::new(rect.x0 + rect.x1 / 2.0, rect.y0 + rect.y1 / 2.0);
@@ -78,6 +81,7 @@ impl<'tree> Node<'tree> {
             .push(Event::Simulated(SimulatedEvent::Click { position: center }));
     }
 
+    /// Focus the node and type the given text
     pub fn type_text(&self, text: &str) {
         self.focus();
         self.queue
@@ -87,6 +91,7 @@ impl<'tree> Node<'tree> {
             }));
     }
 
+    /// Get the parent of the node
     pub fn parent(&self) -> Option<Node<'tree>> {
         self.node.parent().map(|node| Node::new(node, self.queue))
     }

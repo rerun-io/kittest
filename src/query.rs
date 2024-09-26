@@ -4,6 +4,7 @@ use accesskit_consumer::FilterResult;
 use std::collections::BTreeSet;
 use std::iter::FusedIterator;
 
+#[allow(clippy::needless_pass_by_value)]
 fn query_all<'tree>(
     node: Node<'tree>,
     by: By<'tree>,
@@ -46,6 +47,7 @@ fn query_all<'tree>(
     })
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn get_all<'tree>(
     node: Node<'tree>,
     by: By<'tree>,
@@ -59,6 +61,7 @@ fn get_all<'tree>(
     iter
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
     let debug_query = by.debug_clone_without_predicate();
     let mut iter = query_all(node, by);
@@ -74,6 +77,7 @@ fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
     result
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn get<'tree>(node: Node<'tree>, by: By<'tree>) -> Node<'tree> {
     let debug_query = by.debug_clone_without_predicate();
     let option = query(node, by);
@@ -165,7 +169,7 @@ pub trait Queryable<'tree, 'node> {
         (name: &'tree str),
         By::new().name(name),
         #[doc = ""]
-        #[doc = "If the node is labelled by another node, the label node will not be included in the results."]
+        #[doc = "If a node is labelled by another node, the label node will not be included in the results."]
     );
 
     impl_helper!(
@@ -177,7 +181,7 @@ pub trait Queryable<'tree, 'node> {
         (name: &'tree str),
         By::new().name_contains(name),
         #[doc = ""]
-        #[doc = "If the node is labelled by another node, the label node will not be included in the results."]
+        #[doc = "If a node is labelled by another node, the label node will not be included in the results."]
     );
 
     impl_helper!(
@@ -189,7 +193,7 @@ pub trait Queryable<'tree, 'node> {
         (role: accesskit::Role, name: &'tree str),
         By::new().role(role).name(name),
         #[doc = ""]
-        #[doc = "If the node is labelled by another node, the label node will not be included in the results."]
+        #[doc = "If a node is labelled by another node, the label node will not be included in the results."]
     );
 
     impl_helper!(

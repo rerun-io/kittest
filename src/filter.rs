@@ -2,6 +2,8 @@ use crate::Node;
 use accesskit::Role;
 use std::fmt::{Debug, Formatter};
 
+/// Create an empty filter.
+/// Convenience function for [`By::new`].
 pub fn by<'a>() -> By<'a> {
     By::new()
 }
@@ -61,6 +63,7 @@ impl<'a> Default for By<'a> {
 }
 
 impl<'a> By<'a> {
+    /// Create an empty filter.
     pub fn new() -> Self {
         Self {
             name: None,
@@ -73,11 +76,13 @@ impl<'a> By<'a> {
         }
     }
 
+    /// Filter by the name of the node with an exact match.
     pub fn name(mut self, name: &'a str) -> Self {
         self.name = Some(name);
         self
     }
 
+    /// Filter by the name of the node with a substring match.
     pub fn name_contains(mut self, name: &'a str) -> Self {
         self.name = Some(name);
         self.name_contains = true;
@@ -91,22 +96,26 @@ impl<'a> By<'a> {
         self
     }
 
+    /// Filter by a custom predicate.
     pub fn predicate(mut self, predicate: impl Fn(&Node<'_>) -> bool + 'a) -> Self {
         self.predicate = Some(Box::new(predicate));
         self.had_predicate = true;
         self
     }
 
+    /// Filter by the role of the node.
     pub fn role(mut self, role: Role) -> Self {
         self.role = Some(role);
         self
     }
 
+    /// Filter by the value of the node with an exact match.
     pub fn value(mut self, value: &'a str) -> Self {
         self.value = Some(value);
         self
     }
 
+    /// Should the labels of labelled nodes be filtered?
     pub(crate) fn should_filter_labels(&self) -> bool {
         !self.include_labels && self.name.is_some()
     }
