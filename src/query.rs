@@ -1,10 +1,9 @@
 use crate::filter::By;
 use crate::query::hidden::IterType;
 use crate::Node;
-use accesskit_consumer::{FilterResult, Node as AKNode};
+use accesskit_consumer::FilterResult;
 use std::collections::BTreeSet;
-use std::iter::{Filter, FusedIterator};
-use std::ops::Deref;
+use std::iter::FusedIterator;
 
 fn query_by_impl<'tree>(mut iter: impl Iterator<Item = Node<'tree>>) -> Option<Node<'tree>> {
     let result = iter.next();
@@ -19,7 +18,7 @@ fn query_by_impl<'tree>(mut iter: impl Iterator<Item = Node<'tree>>) -> Option<N
     result
 }
 
-fn get_all_by_impl<'tree>(mut iter: impl IterType<'tree>) -> impl IterType<'tree> {
+fn get_all_by_impl<'tree>(iter: impl IterType<'tree>) -> impl IterType<'tree> {
     let mut iter = iter.peekable();
     if iter.peek().is_none() {
         panic!("No nodes found matching the query");
@@ -27,9 +26,125 @@ fn get_all_by_impl<'tree>(mut iter: impl IterType<'tree>) -> impl IterType<'tree
     iter
 }
 
+macro_rules! impl_helper {
+    (
+        $match_doc:literal,
+        $query_all_name:ident,
+        $get_all_name:ident,
+        $query_name:ident,
+        $get_name:ident,
+        ($($args:ident: $arg_ty:ty),*),
+        $by_expr:expr,
+        $(#[$extra_doc:meta])*
+    ) => {
+        /// Query all nodes in the tree where
+        #[doc = $match_doc]
+        $(#[$extra_doc])*
+        fn $query_all_name(&'node self, $($args: $arg_ty),*) -> impl IterType<'tree> + 'tree {
+            self.query_all($by_expr)
+        }
+
+        /// Get all nodes in the tree where
+        #[doc = $match_doc]
+        /// Returns at least one node.
+        $(#[$extra_doc])*
+        ///
+        /// # Panics
+        /// - if no nodes are found matching the query.
+        fn $get_all_name(&'node self, $($args: $arg_ty),*) -> impl IterType<'tree> + 'tree {
+            self.get_all($by_expr)
+        }
+
+        /// Query a single node in the tree where
+        #[doc = $match_doc]
+        /// Returns `None` if no nodes are found.
+        $(#[$extra_doc])*
+        fn $query_name(&'node self, $($args: $arg_ty),*) -> Option<Node<'tree>> {
+            self.query($by_expr)
+        }
+
+        /// Get a single node in the tree where
+        #[doc = $match_doc]
+        $(#[$extra_doc])*
+        ///
+        /// # Panics
+        /// - if no nodes are found matching the query.
+        /// - if more than one node is found matching the query.
+        fn $get_name(&'node self, $($args: $arg_ty),*) -> Node<'tree> {
+            self.get($by_expr)
+        }
+    };
+}
+
 /// Provides convenience methods for querying nodes in the tree, inspired by https://testing-library.com/.
 pub trait Queryable<'tree, 'node> {
     fn node(&'node self) -> crate::Node<'tree>;
+
+    impl_helper!(
+        "the node name exactly matches given name.",
+        query_all_by_name,
+        get_all_by_name,
+        query_by_name,
+        get_by_name,
+        (name: &'tree str),
+        By::new().name(name),
+        #[doc = ""]
+        #[doc = "If the node is labelled by another node, the label node will not be included in the results."]
+    );
+
+    impl_helper!(
+        "the node name contains the given substring.",
+        query_all_by_name_contains,
+        get_all_by_name_contains,
+        query_by_name_contains,
+        get_by_name_contains,
+        (name: &'tree str),
+        By::new().name_contains(name),
+        #[doc = ""]
+        #[doc = "If the node is labelled by another node, the label node will not be included in the results."]
+    );
+
+    impl_helper!(
+        "the node role and name exactly match the given role and name.",
+        query_all_by_role_and_name,
+        get_all_by_role_and_name,
+        query_by_role_and_name,
+        get_by_role_and_name,
+        (role: accesskit::Role, name: &'tree str),
+        By::new().role(role).name(name),
+        #[doc = ""]
+        #[doc = "If the node is labelled by another node, the label node will not be included in the results."]
+    );
+
+    impl_helper!(
+        "the node role matches the given role.",
+        query_all_by_role,
+        get_all_by_role,
+        query_by_role,
+        get_by_role,
+        (role: accesskit::Role),
+        By::new().role(role),
+    );
+
+    impl_helper!(
+        "the node value exactly matches the given value.",
+        query_all_by_value,
+        get_all_by_value,
+        query_by_value,
+        get_by_value,
+        (value: &'tree str),
+        By::new().value(value),
+    );
+
+    impl_helper!(
+        "the node matches the given predicate.",
+        query_all_by,
+        get_all_by,
+        query_by,
+        get_by,
+        (f: impl Fn(&Node<'_>) -> bool + 'tree),
+        By::new().predicate(f),
+    );
 
     /// Query all nodes in the tree that match the given [`By`] query.
     fn query_all(&'node self, by: By<'tree>) -> impl IterType<'tree> + 'tree {
@@ -83,86 +198,7 @@ pub trait Queryable<'tree, 'node> {
     fn get(&'node self, by: By<'tree>) -> Node<'tree> {
         self.query(by).expect("No node found matching the query")
     }
-
-    /// Query all nodes in the tree that match the given predicate.
-    fn query_all_by(
-        &'node self,
-        f: impl Fn(&Node<'_>) -> bool + 'tree,
-    ) -> impl IterType<'tree> + 'tree {
-        self.query_all(By::new().predicate(f))
-    }
-
-    /// Get all nodes in the tree that match the given predicate.
-    /// Returns at least one node.
-    ///
-    /// # Panics
-    /// Will panic if no nodes are found matching the query.
-    fn get_all_by(
-        &'node self,
-        f: impl Fn(&Node<'_>) -> bool + 'tree,
-    ) -> impl IterType<'tree> + 'tree {
-        self.get_all(By::new().predicate(f))
-    }
-
-    /// Query a single node in the tree that matches the given predicate.
-    /// Returns `None` if no nodes are found.
-    ///
-    /// # Panics
-    /// Will panic if more than one node is found matching the query.
-    fn query_by(&'node self, f: impl Fn(&Node<'_>) -> bool + 'tree) -> Option<Node<'tree>> {
-        self.query(By::new().predicate(f))
-    }
-
-    /// Get a single node in the tree that matches the given predicate.
-    ///
-    /// # Panics
-    /// Will panic if no nodes are found matching the query.
-    /// Will panic if more than one node is found matching the query.
-    fn get_by(&'node self, f: impl Fn(&Node<'_>) -> bool + 'tree) -> Node<'tree> {
-        self.get(By::new().predicate(f))
-    }
-
-    /// Query all nodes in the tree with the given name. The name must be an exact match.
-    /// If the node is labelled by another node, the label node will not be returned.
-    fn query_all_by_name(&'node self, name: &'tree str) -> impl IterType<'tree> + 'tree {
-        self.query_all(By::new().name(name))
-    }
-
-    /// Find all nodes in the tree with the given name. The name must be an exact match.
-    /// If the node is labelled by another node, the label node will not be returned.
-    /// Returns at least one node.
-    ///
-    /// # Panics
-    /// Will panic if no nodes are found matching the query.
-    fn get_all_by_name(&'node self, name: &'tree str) -> impl IterType<'tree> + 'tree {
-        self.get_all(By::new().name(name))
-    }
-
-    fn query_by_name(&'node self, name: &'tree str) -> Option<Node<'tree>> {
-        self.query(By::new().name(name))
-    }
-
-    fn get_by_name(&'node self, name: &'tree str) -> Node<'tree> {
-        self.get(By::new().name(name))
-    }
-
-    fn query_all_by_role(&'node self, role: accesskit::Role) -> impl IterType<'tree> + 'tree {
-        self.query_all(By::new().role(role))
-    }
-
-    fn get_all_by_role(&'node self, role: accesskit::Role) -> impl IterType<'tree> + 'tree {
-        self.get_all(By::new().role(role))
-    }
-
-    fn query_by_role(&'node self, role: accesskit::Role) -> Option<Node<'tree>> {
-        self.query(By::new().role(role))
-    }
-
-    fn get_by_role(&'node self, role: accesskit::Role) -> Node<'tree> {
-        self.get(By::new().role(role))
-    }
 }
-
 
 mod hidden {
     use super::*;
