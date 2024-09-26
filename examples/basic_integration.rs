@@ -1,15 +1,24 @@
-use egui::{CentralPanel, Context, RawInput};
+//! This example shows how to build a basic kittest integration for some ui framework (in this case egui).
+//! If you actually want to use kittest with egui, I suggest you check out the official
+//! [egui_kittest][1] integration.
+//!
+//! [1]: <https://github.com/emilk/egui/tree/master/crates/egui_kittest>
+
 use kittest::{Event, Node, Queryable};
 
+/// The test Harness. This contains everything needed to run the test.
 pub struct Harness<'a> {
-    ctx: Context,
-    tree: kittest::Tree,
-    app: Box<dyn FnMut(&Context) + 'a>,
+    /// A handle to the ui framework
+    ctx: egui::Context,
+    /// the ui component that should be tested (for egui that's just a closure).
+    app: Box<dyn FnMut(&egui::Context) + 'a>,
+    /// The kittest State
+    state: kittest::State,
 }
 
 impl<'a> Harness<'a> {
-    pub fn new(mut app: impl FnMut(&Context) + 'a) -> Harness<'a> {
-        let ctx = Context::default();
+    pub fn new(mut app: impl FnMut(&egui::Context) + 'a) -> Harness<'a> {
+        let ctx = egui::Context::default();
         ctx.enable_accesskit();
 
         let output = ctx.run(Default::default(), &mut app);
@@ -17,7 +26,7 @@ impl<'a> Harness<'a> {
         Self {
             ctx,
             app: Box::new(app),
-            tree: kittest::Tree::new(
+            state: kittest::State::new(
                 output
                     .platform_output
                     .accesskit_update
@@ -28,7 +37,7 @@ impl<'a> Harness<'a> {
 
     pub fn run_frame(&mut self) {
         let events = self
-            .tree
+            .state
             .take_events()
             .into_iter()
             .map(|e| match e {
@@ -40,14 +49,14 @@ impl<'a> Harness<'a> {
             .collect();
 
         let output = self.ctx.run(
-            RawInput {
+            egui::RawInput {
                 events,
                 ..Default::default()
             },
             self.app.as_mut(),
         );
 
-        self.tree.update(
+        self.state.update(
             output
                 .platform_output
                 .accesskit_update
@@ -62,14 +71,14 @@ where
     'node: 'tree,
 {
     fn node(&'node self) -> Node<'tree> {
-        self.tree.root()
+        self.state.root()
     }
 }
 
 fn main() {
     let mut checked = false;
     let mut harness = Harness::new(|ctx| {
-        CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show(ctx, |ui| {
             ui.checkbox(&mut checked, "Check me!");
         });
     });

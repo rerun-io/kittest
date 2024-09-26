@@ -15,20 +15,20 @@ impl<'a> Debug for Node<'a> {
         let mut s = f.debug_struct("Node");
         s.field("id", &self.node.id());
         s.field("role", &self.node.role());
-        s.field("focused", &self.node.is_focused());
-        s.field("hidden", &self.node.is_hidden());
-        s.field("disabled", &self.node.is_disabled());
         if let Some(name) = self.node.name() {
             s.field("name", &name);
         }
         if let Some(value) = self.node.value() {
             s.field("value", &value);
         }
-        if let Some(toggled) = self.node.toggled() {
-            s.field("toggled", &toggled);
-        }
         if let Some(numeric) = self.node.numeric_value() {
             s.field("numeric_value", &numeric);
+        }
+        s.field("focused", &self.node.is_focused());
+        s.field("hidden", &self.node.is_hidden());
+        s.field("disabled", &self.node.is_disabled());
+        if let Some(toggled) = self.node.toggled() {
+            s.field("toggled", &toggled);
         }
         s.finish()
     }

@@ -4,14 +4,14 @@ use crate::Node;
 use accesskit::TreeUpdate;
 use parking_lot::Mutex;
 
-pub struct Tree {
+pub struct State {
     tree: accesskit_consumer::Tree,
     queued_events: Mutex<Vec<Event>>,
 }
 
 pub(crate) type EventQueue = Mutex<Vec<Event>>;
 
-impl Tree {
+impl State {
     pub fn new(update: TreeUpdate) -> Self {
         Self {
             tree: accesskit_consumer::Tree::new(update, true),
@@ -32,7 +32,7 @@ impl Tree {
     }
 }
 
-impl<'tree, 'node> Queryable<'tree, 'node> for Tree
+impl<'tree, 'node> Queryable<'tree, 'node> for State
 where
     'node: 'tree,
 {
