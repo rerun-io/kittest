@@ -5,27 +5,6 @@ use accesskit_consumer::FilterResult;
 use std::collections::BTreeSet;
 use std::iter::FusedIterator;
 
-fn query_by_impl<'tree>(mut iter: impl Iterator<Item = Node<'tree>>) -> Option<Node<'tree>> {
-    let result = iter.next();
-
-    if let Some(second) = iter.next() {
-        let first = result?;
-        panic!(
-            "Found two or more nodes matching the query:\n{:?}\n{:?}",
-            first, second,
-        );
-    }
-    result
-}
-
-fn get_all_by_impl<'tree>(iter: impl IterType<'tree>) -> impl IterType<'tree> {
-    let mut iter = iter.peekable();
-    if iter.peek().is_none() {
-        panic!("No nodes found matching the query");
-    }
-    iter
-}
-
 macro_rules! impl_helper {
     (
         $match_doc:literal,
@@ -188,28 +167,52 @@ pub trait Queryable<'tree, 'node> {
     }
 
     fn get_all(&'node self, by: By<'tree>) -> impl IterType<'tree> + 'tree {
-        get_all_by_impl(self.query_all(by))
+        let debug_query = by.debug_clone_without_predicate();
+        let mut iter = self.query_all(by).peekable();
+        if iter.peek().is_none() {
+            panic!("No nodes found matching the query: {:?}", debug_query);
+        }
+        iter
     }
 
     fn query(&'node self, by: By<'tree>) -> Option<Node<'tree>> {
-        query_by_impl(self.query_all(by))
+        let debug_query = by.debug_clone_without_predicate();
+        let mut iter = self.query_all(by);
+        let result = iter.next();
+
+        if let Some(second) = iter.next() {
+            let first = result?;
+            panic!(
+                "Found two or more nodes matching the query: \n{:?}\n\nFirst node: {:?}\nSecond node: {:?}\
+                \n\nIf you were expecting multiple nodes, use query_all instead of query.",
+                debug_query, first, second
+            );
+        }
+        result
     }
 
     fn get(&'node self, by: By<'tree>) -> Node<'tree> {
-        self.query(by).expect("No node found matching the query")
+        let debug_query = by.debug_clone_without_predicate();
+        let option = self.query(by);
+        if let Some(node) = option {
+            node
+        } else {
+            panic!("No nodes found matching the query: {:?}", debug_query);
+        }
     }
 }
 
 mod hidden {
     use super::*;
     pub trait IterType<'tree>:
-    DoubleEndedIterator<Item=Node<'tree>> + FusedIterator<Item=Node<'tree>>
-    {}
+        DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>>
+    {
+    }
 
-    impl<'tree, T> IterType<'tree> for T
-    where
-        T: DoubleEndedIterator<Item=Node<'tree>> + FusedIterator<Item=Node<'tree>>,
-    {}
+    impl<'tree, T> IterType<'tree> for T where
+        T: DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>>
+    {
+    }
 }
 
 // TODO: query_all could be optimized by returning different iterators based on should_filter_labels
