@@ -1,11 +1,13 @@
 use crate::filter::By;
-use crate::query::hidden::IterType;
 use crate::Node;
 use accesskit_consumer::FilterResult;
 use std::collections::BTreeSet;
 use std::iter::FusedIterator;
 
-fn query_all<'tree>(node: Node<'tree>, by: By<'tree>) -> impl IterType<'tree> + 'tree {
+fn query_all<'tree>(
+    node: Node<'tree>,
+    by: By<'tree>,
+) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
     let should_filter_labels = by.should_filter_labels();
 
     let queue = node.queue();
@@ -44,7 +46,10 @@ fn query_all<'tree>(node: Node<'tree>, by: By<'tree>) -> impl IterType<'tree> + 
     })
 }
 
-fn get_all<'tree>(node: Node<'tree>, by: By<'tree>) -> impl IterType<'tree> + 'tree {
+fn get_all<'tree>(
+    node: Node<'tree>,
+    by: By<'tree>,
+) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
     let debug_query = by.debug_clone_without_predicate();
     let mut iter = query_all(node, by).peekable();
     assert!(
@@ -94,7 +99,9 @@ macro_rules! impl_helper {
         #[doc = $match_doc]
         $(#[$extra_doc])*
         #[track_caller]
-        fn $query_all_name(&'node self, $($args: $arg_ty),*) -> impl IterType<'tree> + 'tree {
+        fn $query_all_name(
+            &'node self, $($args: $arg_ty),*
+        ) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
             query_all(self.node(), $by_expr)
         }
 
@@ -106,7 +113,9 @@ macro_rules! impl_helper {
         /// # Panics
         /// - if no nodes are found matching the query.
         #[track_caller]
-        fn $get_all_name(&'node self, $($args: $arg_ty),*) -> impl IterType<'tree> + 'tree {
+        fn $get_all_name(
+            &'node self, $($args: $arg_ty),*
+        ) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
             get_all(self.node(), $by_expr)
         }
 
@@ -212,19 +221,6 @@ pub trait Queryable<'tree, 'node> {
         (f: impl Fn(&Node<'_>) -> bool + 'tree),
         By::new().predicate(f),
     );
-}
-
-mod hidden {
-    use super::{FusedIterator, Node};
-    pub trait IterType<'tree>:
-        DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>>
-    {
-    }
-
-    impl<'tree, T> IterType<'tree> for T where
-        T: DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>>
-    {
-    }
 }
 
 // TODO: query_all could be optimized by returning different iterators based on should_filter_labels
