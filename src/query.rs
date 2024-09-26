@@ -5,6 +5,80 @@ use accesskit_consumer::FilterResult;
 use std::collections::BTreeSet;
 use std::iter::FusedIterator;
 
+fn query_all<'tree>(node: Node<'tree>, by: By<'tree>) -> impl IterType<'tree> + 'tree {
+    let should_filter_labels = by.should_filter_labels();
+
+    let queue = node.queue();
+    let results = node
+        .filtered_children(move |node| {
+            if by.matches(&Node::new(*node, queue)) {
+                FilterResult::Include
+            } else {
+                FilterResult::ExcludeNode
+            }
+        })
+        .map(|node| Node::new(node, queue));
+
+    let nodes = results.collect::<Vec<_>>();
+
+    // If the widget label is provided by a different node, both will have the same name.
+    // We only want to return the node that is labelled by the other node, not the label node.
+    // (This matches the behavior of the testing-library getByLabelText query.)
+    let labels: BTreeSet<_> = if should_filter_labels {
+        nodes
+            .iter()
+            // TODO(lucas): It would be nicer if we could just get ids via something like labelled_by_ids
+            .flat_map(|node| node.labelled_by())
+            .map(|node| node.id())
+            .collect()
+    } else {
+        BTreeSet::new()
+    };
+
+    nodes.into_iter().filter(move |node| {
+        if should_filter_labels {
+            !labels.contains(&node.id())
+        } else {
+            true
+        }
+    })
+}
+
+fn get_all<'tree>(node: Node<'tree>, by: By<'tree>) -> impl IterType<'tree> + 'tree {
+    let debug_query = by.debug_clone_without_predicate();
+    let mut iter = query_all(node, by).peekable();
+    assert!(
+        iter.peek().is_some(),
+        "No nodes found matching the query: {debug_query:?}"
+    );
+    iter
+}
+
+fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
+    let debug_query = by.debug_clone_without_predicate();
+    let mut iter = query_all(node, by);
+    let result = iter.next();
+
+    if let Some(second) = iter.next() {
+        let first = result?;
+        panic!(
+            "Found two or more nodes matching the query: \n{debug_query:?}\n\nFirst node: {first:?}\nSecond node: {second:?}\
+                \n\nIf you were expecting multiple nodes, use query_all instead of query."
+        );
+    }
+    result
+}
+
+fn get<'tree>(node: Node<'tree>, by: By<'tree>) -> Node<'tree> {
+    let debug_query = by.debug_clone_without_predicate();
+    let option = query(node, by);
+    if let Some(node) = option {
+        node
+    } else {
+        panic!("No nodes found matching the query: {debug_query:?}");
+    }
+}
+
 macro_rules! impl_helper {
     (
         $match_doc:literal,
@@ -21,7 +95,7 @@ macro_rules! impl_helper {
         $(#[$extra_doc])*
         #[track_caller]
         fn $query_all_name(&'node self, $($args: $arg_ty),*) -> impl IterType<'tree> + 'tree {
-            self.query_all($by_expr)
+            query_all(self.node(), $by_expr)
         }
 
         /// Get all nodes in the tree where
@@ -33,7 +107,7 @@ macro_rules! impl_helper {
         /// - if no nodes are found matching the query.
         #[track_caller]
         fn $get_all_name(&'node self, $($args: $arg_ty),*) -> impl IterType<'tree> + 'tree {
-            self.get_all($by_expr)
+            get_all(self.node(), $by_expr)
         }
 
         /// Query a single node in the tree where
@@ -42,7 +116,7 @@ macro_rules! impl_helper {
         $(#[$extra_doc])*
         #[track_caller]
         fn $query_name(&'node self, $($args: $arg_ty),*) -> Option<Node<'tree>> {
-            self.query($by_expr)
+            query(self.node(), $by_expr)
         }
 
         /// Get a single node in the tree where
@@ -54,7 +128,7 @@ macro_rules! impl_helper {
         /// - if more than one node is found matching the query.
         #[track_caller]
         fn $get_name(&'node self, $($args: $arg_ty),*) -> Node<'tree> {
-            self.get($by_expr)
+            get(self.node(), $by_expr)
         }
     };
 }
@@ -62,6 +136,16 @@ macro_rules! impl_helper {
 /// Provides convenience methods for querying nodes in the tree, inspired by <https://testing-library.com/>.
 pub trait Queryable<'tree, 'node> {
     fn node(&'node self) -> crate::Node<'tree>;
+
+    impl_helper!(
+        "the node matches the given [`By`] filter.",
+        query_all,
+        get_all,
+        query,
+        get,
+        (by: By<'tree>),
+        by,
+    );
 
     impl_helper!(
         "the node name exactly matches given name.",
@@ -128,83 +212,6 @@ pub trait Queryable<'tree, 'node> {
         (f: impl Fn(&Node<'_>) -> bool + 'tree),
         By::new().predicate(f),
     );
-
-    /// Query all nodes in the tree that match the given [`By`] query.
-    #[track_caller]
-    fn query_all(&'node self, by: By<'tree>) -> impl IterType<'tree> + 'tree {
-        let should_filter_labels = by.should_filter_labels();
-
-        let queue = self.node().queue();
-        let results = self
-            .node()
-            .filtered_children(move |node| {
-                if by.matches(&Node::new(*node, queue)) {
-                    FilterResult::Include
-                } else {
-                    FilterResult::ExcludeNode
-                }
-            })
-            .map(|node| Node::new(node, queue));
-
-        let nodes = results.collect::<Vec<_>>();
-
-        // If the widget label is provided by a different node, both will have the same name.
-        // We only want to return the node that is labelled by the other node, not the label node.
-        // (This matches the behavior of the testing-library getByLabelText query.)
-        let labels: BTreeSet<_> = if should_filter_labels {
-            nodes
-                .iter()
-                // TODO(lucas): It would be nicer if we could just get ids via something like labelled_by_ids
-                .flat_map(|node| node.labelled_by())
-                .map(|node| node.id())
-                .collect()
-        } else {
-            BTreeSet::new()
-        };
-
-        nodes.into_iter().filter(move |node| {
-            if should_filter_labels {
-                !labels.contains(&node.id())
-            } else {
-                true
-            }
-        })
-    }
-
-    #[track_caller]
-    fn get_all(&'node self, by: By<'tree>) -> impl IterType<'tree> + 'tree {
-        let debug_query = by.debug_clone_without_predicate();
-        let mut iter = self.query_all(by).peekable();
-        assert!(iter.peek().is_some(), "No nodes found matching the query: {debug_query:?}");
-        iter
-    }
-
-    #[track_caller]
-    fn query(&'node self, by: By<'tree>) -> Option<Node<'tree>> {
-        let debug_query = by.debug_clone_without_predicate();
-        let mut iter = self.query_all(by);
-        let result = iter.next();
-
-        if let Some(second) = iter.next() {
-            let first = result?;
-            panic!(
-                "Found two or more nodes matching the query: \n{debug_query:?}\n\nFirst node: {first:?}\nSecond node: {second:?}\
-                \n\nIf you were expecting multiple nodes, use query_all instead of query."
-            );
-        }
-        result
-    }
-
-    #[track_caller]
-    fn get(&'node self, by: By<'tree>) -> Node<'tree> {
-        let debug_query = by.debug_clone_without_predicate();
-        let option = self.query(by);
-        if let Some(node) = option {
-            node
-        } else {
-            panic!("No nodes found matching the query: {debug_query:?}");
-        }
-    }
 }
 
 mod hidden {
