@@ -12,6 +12,7 @@ pub struct By<'a> {
     name: Option<&'a str>,
     name_contains: bool,
     include_labels: bool,
+    #[allow(clippy::type_complexity)]
     predicate: Option<Box<dyn Fn(&Node<'_>) -> bool + 'a>>,
     had_predicate: bool,
     role: Option<Role>,
@@ -50,6 +51,12 @@ impl<'a> Debug for By<'a> {
             s.field("value", &value);
         }
         s.finish()
+    }
+}
+
+impl<'a> Default for By<'a> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -130,10 +137,8 @@ impl<'a> By<'a> {
                     if !node_name.contains(name) {
                         return false;
                     }
-                } else {
-                    if node_name != name {
-                        return false;
-                    }
+                } else if node_name != name {
+                    return false;
                 }
             } else {
                 return false;

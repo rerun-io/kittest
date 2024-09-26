@@ -19,6 +19,7 @@ macro_rules! impl_helper {
         /// Query all nodes in the tree where
         #[doc = $match_doc]
         $(#[$extra_doc])*
+        #[track_caller]
         fn $query_all_name(&'node self, $($args: $arg_ty),*) -> impl IterType<'tree> + 'tree {
             self.query_all($by_expr)
         }
@@ -30,6 +31,7 @@ macro_rules! impl_helper {
         ///
         /// # Panics
         /// - if no nodes are found matching the query.
+        #[track_caller]
         fn $get_all_name(&'node self, $($args: $arg_ty),*) -> impl IterType<'tree> + 'tree {
             self.get_all($by_expr)
         }
@@ -38,6 +40,7 @@ macro_rules! impl_helper {
         #[doc = $match_doc]
         /// Returns `None` if no nodes are found.
         $(#[$extra_doc])*
+        #[track_caller]
         fn $query_name(&'node self, $($args: $arg_ty),*) -> Option<Node<'tree>> {
             self.query($by_expr)
         }
@@ -49,13 +52,14 @@ macro_rules! impl_helper {
         /// # Panics
         /// - if no nodes are found matching the query.
         /// - if more than one node is found matching the query.
+        #[track_caller]
         fn $get_name(&'node self, $($args: $arg_ty),*) -> Node<'tree> {
             self.get($by_expr)
         }
     };
 }
 
-/// Provides convenience methods for querying nodes in the tree, inspired by https://testing-library.com/.
+/// Provides convenience methods for querying nodes in the tree, inspired by <https://testing-library.com/>.
 pub trait Queryable<'tree, 'node> {
     fn node(&'node self) -> crate::Node<'tree>;
 
@@ -126,6 +130,7 @@ pub trait Queryable<'tree, 'node> {
     );
 
     /// Query all nodes in the tree that match the given [`By`] query.
+    #[track_caller]
     fn query_all(&'node self, by: By<'tree>) -> impl IterType<'tree> + 'tree {
         let should_filter_labels = by.should_filter_labels();
 
@@ -166,15 +171,15 @@ pub trait Queryable<'tree, 'node> {
         })
     }
 
+    #[track_caller]
     fn get_all(&'node self, by: By<'tree>) -> impl IterType<'tree> + 'tree {
         let debug_query = by.debug_clone_without_predicate();
         let mut iter = self.query_all(by).peekable();
-        if iter.peek().is_none() {
-            panic!("No nodes found matching the query: {:?}", debug_query);
-        }
+        assert!(iter.peek().is_some(), "No nodes found matching the query: {debug_query:?}");
         iter
     }
 
+    #[track_caller]
     fn query(&'node self, by: By<'tree>) -> Option<Node<'tree>> {
         let debug_query = by.debug_clone_without_predicate();
         let mut iter = self.query_all(by);
@@ -183,27 +188,27 @@ pub trait Queryable<'tree, 'node> {
         if let Some(second) = iter.next() {
             let first = result?;
             panic!(
-                "Found two or more nodes matching the query: \n{:?}\n\nFirst node: {:?}\nSecond node: {:?}\
-                \n\nIf you were expecting multiple nodes, use query_all instead of query.",
-                debug_query, first, second
+                "Found two or more nodes matching the query: \n{debug_query:?}\n\nFirst node: {first:?}\nSecond node: {second:?}\
+                \n\nIf you were expecting multiple nodes, use query_all instead of query."
             );
         }
         result
     }
 
+    #[track_caller]
     fn get(&'node self, by: By<'tree>) -> Node<'tree> {
         let debug_query = by.debug_clone_without_predicate();
         let option = self.query(by);
         if let Some(node) = option {
             node
         } else {
-            panic!("No nodes found matching the query: {:?}", debug_query);
+            panic!("No nodes found matching the query: {debug_query:?}");
         }
     }
 }
 
 mod hidden {
-    use super::*;
+    use super::{FusedIterator, Node};
     pub trait IterType<'tree>:
         DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>>
     {

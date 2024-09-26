@@ -86,6 +86,10 @@ impl<'tree> Node<'tree> {
                 text: text.to_owned(),
             }));
     }
+
+    pub fn parent(&self) -> Option<Node<'tree>> {
+        self.node.parent().map(|node| Node::new(node, self.queue))
+    }
 }
 
 impl<'t, 'n> Queryable<'t, 'n> for Node<'t> {

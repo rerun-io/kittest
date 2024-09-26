@@ -91,6 +91,18 @@ jobs:
           command: test
           args: --all-features
 
+      - name: Run basic_integration example
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example basic_integration
+
+      - name: Run querying example
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example querying
+
       - name: Clippy
         uses: actions-rs/cargo@v1
         with:
