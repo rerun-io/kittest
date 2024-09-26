@@ -1,6 +1,7 @@
 use crate::event::{Event, SimulatedEvent};
 use crate::query::Queryable;
 use crate::tree::EventQueue;
+use crate::{ElementState, Key, MouseButton};
 use accesskit::{ActionRequest, Vec2};
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
@@ -54,41 +55,121 @@ impl<'tree> Node<'tree> {
         self.queue
     }
 
+    fn event(&self, event: Event) {
+        self.queue.lock().push(event);
+    }
+
     /// Request focus for the node via accesskit
     pub fn focus(&self) {
-        self.queue.lock().push(Event::ActionRequest(ActionRequest {
+        self.event(Event::ActionRequest(ActionRequest {
             data: None,
             action: accesskit::Action::Focus,
             target: self.node.id(),
         }));
     }
 
-    /// Click the node via accesskit
+    /// Click the node via accesskit. This will trigger a ['accesskit::Action::Default'] action
     pub fn click(&self) {
-        self.queue.lock().push(Event::ActionRequest(ActionRequest {
+        self.event(Event::ActionRequest(ActionRequest {
             data: None,
             action: accesskit::Action::Default,
             target: self.node.id(),
         }));
     }
 
-    /// Simulate a click event at the node center
-    pub fn simulate_click(&self) {
+    /// Hover the cursor at the node center
+    pub fn hover(&self) {
         let rect = self.node.raw_bounds().expect("Node has no bounds");
         let center = Vec2::new(rect.x0 + rect.x1 / 2.0, rect.y0 + rect.y1 / 2.0);
-        self.queue
-            .lock()
-            .push(Event::Simulated(SimulatedEvent::Click { position: center }));
+        self.event(Event::Simulated(SimulatedEvent::CursorMoved {
+            position: center,
+        }));
+    }
+
+    /// Simulate a click event at the node center
+    pub fn simulate_click(&self) {
+        ElementState::click().for_each(|state| {
+            self.event(Event::Simulated(SimulatedEvent::MouseInput {
+                button: MouseButton::Left,
+                state,
+            }));
+        });
     }
 
     /// Focus the node and type the given text
     pub fn type_text(&self, text: &str) {
         self.focus();
-        self.queue
-            .lock()
-            .push(Event::Simulated(SimulatedEvent::Type {
-                text: text.to_owned(),
+        self.event(Event::Simulated(SimulatedEvent::Ime(text.to_owned())));
+    }
+
+    /// Press the given keys in combination
+    ///
+    /// For e.g. [`Key::Control`] + [`Key::A`] this would generate:
+    /// - Press [`Key::Control`]
+    /// - Press [`Key::A`]
+    /// - Release [`Key::A`]
+    /// - Release [`Key::Control`]
+    pub fn key_combination(&self, keys: &[Key]) {
+        self.focus();
+        keys.iter().for_each(|key| {
+            self.event(Event::Simulated(SimulatedEvent::KeyInput {
+                key: *key,
+                state: ElementState::Pressed,
             }));
+        });
+        keys.iter().rev().for_each(|key| {
+            self.event(Event::Simulated(SimulatedEvent::KeyInput {
+                key: *key,
+                state: ElementState::Released,
+            }));
+        });
+    }
+
+    /// Press the given keys
+    /// For e.g. [`Key::Control`] + [`Key::A`] this would generate:
+    /// - Press [`Key::Control`]
+    /// - Release [`Key::Control`]
+    /// - Press [`Key::A`]
+    /// - Release [`Key::A`]
+    pub fn press_keys(&self, keys: &[Key]) {
+        self.focus();
+        keys.iter().for_each(|key| {
+            ElementState::click().for_each(|state| {
+                self.event(Event::Simulated(SimulatedEvent::KeyInput {
+                    key: *key,
+                    state,
+                }));
+            });
+        });
+    }
+
+    /// Press the given key
+    pub fn key_down(&self, key: Key) {
+        self.focus();
+        self.event(Event::Simulated(SimulatedEvent::KeyInput {
+            key,
+            state: ElementState::Pressed,
+        }));
+    }
+
+    /// Release the given key
+    pub fn key_up(&self, key: Key) {
+        self.focus();
+        self.event(Event::Simulated(SimulatedEvent::KeyInput {
+            key,
+            state: ElementState::Released,
+        }));
+    }
+
+    /// Press and release the given key
+    pub fn key_press(&self, key: Key) {
+        self.focus();
+        ElementState::click().for_each(|state| {
+            self.event(Event::Simulated(SimulatedEvent::KeyInput {
+                key,
+                state,
+            }));
+        });
     }
 
     /// Get the parent of the node
