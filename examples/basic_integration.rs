@@ -43,7 +43,7 @@ impl<'a> Harness<'a> {
             .map(|e| match e {
                 Event::ActionRequest(action) => egui::Event::AccessKitActionRequest(action),
                 Event::Simulated(_) => {
-                    todo!("Check egui_kittest for a full implementation");
+                    panic!("Check egui_kittest for a full implementation");
                 }
             })
             .collect();

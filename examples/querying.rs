@@ -13,7 +13,9 @@ fn main() {
     let harness = make_tree();
 
     // You can query nodes by their name (query_by_* functions always return an Option<Node>)
-    let _button_1 = harness.query_by_name("Button 1").unwrap();
+    let _button_1 = harness
+        .query_by_name("Button 1")
+        .expect("Button 1 not found");
 
     // You can get nodes by their name (get_by_* functions will panic with a helpful error message
     // if the node is not found)
@@ -21,16 +23,17 @@ fn main() {
 
     // You can get all nodes with a certain name
     let buttons = harness.query_all_by_name("Duplicate");
-    assert_eq!(buttons.count(), 2);
+    assert_eq!(
+        buttons.count(),
+        2,
+        "Expected 2 buttons with the name 'Duplicate'"
+    );
 
     // If you have multiple items with the same name, you can query by name and role
     let _submit = harness.get_by_role_and_name(Role::Button, "Submit");
 
-    // If need more complex queries, you can use the by struct
-    let _check_me = harness
-        .get_all(by().role(Role::CheckBox).name_contains("Check"))
-        .next()
-        .unwrap();
+    // If you need more complex queries, you can use the by struct
+    let _check_me = harness.get(by().role(Role::CheckBox).name_contains("Check"));
 
     // You can also query children of a node
     let _group = harness.get_by_name("My Group");
@@ -46,6 +49,7 @@ fn main() {
     // harness.get_by_role(Role::Button); // This will panic!
 }
 
+#[allow(clippy::let_underscore_must_use)]
 fn make_tree() -> Harness<'static> {
     Harness::new(|ctx| {
         egui::CentralPanel::default().show(ctx, |ui| {
