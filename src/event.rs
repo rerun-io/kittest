@@ -11,7 +11,7 @@ pub enum Event {
 
 /// A Simulated Event. These should map to the event type of the gui framework.
 ///
-/// The structure is inspired by the `winit` WindowEvent types.
+/// The structure is inspired by the `winit` `WindowEvent` types.
 pub enum SimulatedEvent {
     CursorMoved {
         position: Vec2,
@@ -28,7 +28,7 @@ pub enum SimulatedEvent {
 }
 
 /// The state of an element (e.g. Button), either pressed or released.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ElementState {
     Pressed,
     Released,
@@ -41,7 +41,7 @@ impl ElementState {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MouseButton {
     Left,
     Right,
@@ -50,7 +50,6 @@ pub enum MouseButton {
     Forward,
     Other(u16),
 }
-
 
 /// The keys (currently these match egui's keys).
 #[non_exhaustive]

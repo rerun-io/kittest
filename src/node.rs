@@ -68,7 +68,7 @@ impl<'tree> Node<'tree> {
         }));
     }
 
-    /// Click the node via accesskit. This will trigger a ['accesskit::Action::Default'] action
+    /// Click the node via accesskit. This will trigger a [`accesskit::Action::Default`] action
     pub fn click(&self) {
         self.event(Event::ActionRequest(ActionRequest {
             data: None,
@@ -111,12 +111,12 @@ impl<'tree> Node<'tree> {
     /// - Release [`Key::Control`]
     pub fn key_combination(&self, keys: &[Key]) {
         self.focus();
-        keys.iter().for_each(|key| {
+        for key in keys {
             self.event(Event::Simulated(SimulatedEvent::KeyInput {
                 key: *key,
                 state: ElementState::Pressed,
             }));
-        });
+        }
         keys.iter().rev().for_each(|key| {
             self.event(Event::Simulated(SimulatedEvent::KeyInput {
                 key: *key,
@@ -133,14 +133,14 @@ impl<'tree> Node<'tree> {
     /// - Release [`Key::A`]
     pub fn press_keys(&self, keys: &[Key]) {
         self.focus();
-        keys.iter().for_each(|key| {
+        for key in keys {
             ElementState::click().for_each(|state| {
                 self.event(Event::Simulated(SimulatedEvent::KeyInput {
                     key: *key,
                     state,
                 }));
             });
-        });
+        }
     }
 
     /// Press the given key
@@ -165,10 +165,7 @@ impl<'tree> Node<'tree> {
     pub fn key_press(&self, key: Key) {
         self.focus();
         ElementState::click().for_each(|state| {
-            self.event(Event::Simulated(SimulatedEvent::KeyInput {
-                key,
-                state,
-            }));
+            self.event(Event::Simulated(SimulatedEvent::KeyInput { key, state }));
         });
     }
 
