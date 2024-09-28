@@ -97,9 +97,9 @@ impl<'tree> Node<'tree> {
     }
 
     /// Focus the node and type the given text
-    pub fn type_text(&self, text: &str) {
+    pub fn type_text(&self, text: impl Into<String>) {
         self.focus();
-        self.event(Event::Simulated(SimulatedEvent::Ime(text.to_owned())));
+        self.event(Event::Simulated(SimulatedEvent::Ime(text.into())));
     }
 
     /// Press the given keys in combination
