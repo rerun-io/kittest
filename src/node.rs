@@ -1,12 +1,13 @@
 use crate::event::{Event, SimulatedEvent};
 use crate::query::Queryable;
 use crate::state::EventQueue;
-use crate::{By, ElementState, Key, MouseButton};
+use crate::{by, ElementState, Key, MouseButton};
 use accesskit::{ActionRequest, Vec2};
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
 
 /// A node in the accessibility tree. This should correspond to a widget or container in the GUI
+#[derive(Copy, Clone)]
 pub struct Node<'tree> {
     node: accesskit_consumer::Node<'tree>,
     pub(crate) queue: &'tree EventQueue,
@@ -33,7 +34,7 @@ impl<'a> Debug for Node<'a> {
             s.field("toggled", &toggled);
         }
 
-        let children = self.query_all(By::default()).collect::<Vec<Node>>();
+        let children = self.query_all(by().recursive(false)).collect::<Vec<Node<'_>>>();
 
         s.field("children", &children);
 

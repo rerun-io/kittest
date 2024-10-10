@@ -66,7 +66,9 @@ fn make_tree() -> Harness<'static> {
             let group_label = ui.label("My Group");
             _ = ui
                 .group(|ui| {
-                    _ = ui.button("Duplicate");
+                    ui.ctx().clone().with_accessibility_parent(group_label.id, || {
+                        _ = ui.button("Duplicate");
+                    });
                 })
                 .response
                 .labelled_by(group_label.id);
