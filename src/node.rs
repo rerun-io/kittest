@@ -34,7 +34,9 @@ impl<'a> Debug for Node<'a> {
             s.field("toggled", &toggled);
         }
 
-        let children = self.query_all(by().recursive(false)).collect::<Vec<Node<'_>>>();
+        let children = self
+            .query_all(by().recursive(false))
+            .collect::<Vec<Node<'_>>>();
 
         s.field("children", &children);
 

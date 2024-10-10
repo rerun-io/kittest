@@ -65,9 +65,11 @@ fn make_tree() -> Harness<'static> {
             _ = ui
                 .group(|ui| {
                     // TODO(lucasmerlin): Egui should probably group widgets by their parent automatically
-                    ui.ctx().clone().with_accessibility_parent(group_label.id, || {
-                        _ = ui.button("Duplicate");
-                    });
+                    ui.ctx()
+                        .clone()
+                        .with_accessibility_parent(group_label.id, || {
+                            _ = ui.button("Duplicate");
+                        });
                 })
                 .response
                 .labelled_by(group_label.id);

@@ -1,9 +1,9 @@
-use std::fmt::{Debug, Formatter};
 use crate::event::Event;
 use crate::query::Queryable;
 use crate::Node;
 use accesskit::TreeUpdate;
 use parking_lot::Mutex;
+use std::fmt::{Debug, Formatter};
 
 /// The kittest state
 pub struct State {

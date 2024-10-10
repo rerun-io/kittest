@@ -16,7 +16,10 @@ fn children(node: Node<'_>) -> impl Iterator<Item = Node<'_>> + '_ {
     node.children().map(move |node| Node::new(node, queue))
 }
 
-fn children_maybe_recursive(node: Node<'_>, recursive: bool) -> Box<dyn Iterator<Item = Node<'_>> + '_> {
+fn children_maybe_recursive(
+    node: Node<'_>,
+    recursive: bool,
+) -> Box<dyn Iterator<Item = Node<'_>> + '_> {
     if recursive {
         children_recursive(node)
     } else {
