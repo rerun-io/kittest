@@ -1,6 +1,6 @@
 use crate::event::{Event, SimulatedEvent};
 use crate::query::Queryable;
-use crate::tree::EventQueue;
+use crate::state::EventQueue;
 use crate::{ElementState, Key, MouseButton};
 use accesskit::{ActionRequest, Vec2};
 use std::fmt::{Debug, Formatter};
