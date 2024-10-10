@@ -1,7 +1,7 @@
 use crate::event::{Event, SimulatedEvent};
 use crate::query::Queryable;
 use crate::state::EventQueue;
-use crate::{ElementState, Key, MouseButton};
+use crate::{By, ElementState, Key, MouseButton};
 use accesskit::{ActionRequest, Vec2};
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
@@ -32,6 +32,11 @@ impl<'a> Debug for Node<'a> {
         if let Some(toggled) = self.node.toggled() {
             s.field("toggled", &toggled);
         }
+
+        let children = self.query_all(By::default()).collect::<Vec<Node>>();
+
+        s.field("children", &children);
+
         s.finish()
     }
 }
