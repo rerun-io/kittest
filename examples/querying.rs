@@ -40,8 +40,8 @@ fn main() {
     // get_by_name won't panic here since we only find the button in the group
     group.get_by_name("Duplicate");
 
-    let btn_in_parent = harness.get_all_by_name("Duplicate").next_back().unwrap();
-    assert_eq!(btn_in_parent.parent_id().unwrap(), group.id());
+    let btn_in_parent = harness.get_all_by_name("Duplicate").next_back().expect("No buttons found");
+    assert_eq!(btn_in_parent.parent_id().expect("No parent id"), group.id(), "Button is not in the group");
 
     // query_by and get_by functions will panic if more than one node is found
     // harness.get_by_role(Role::Button); // This will panic!
