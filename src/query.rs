@@ -1,26 +1,41 @@
 use crate::filter::By;
 use crate::Node;
-use accesskit_consumer::FilterResult;
 use std::collections::BTreeSet;
-use std::iter::FusedIterator;
+use std::iter::{once, FusedIterator};
+
+fn children_recursive(node: Node<'_>) -> Box<dyn Iterator<Item = Node<'_>> + '_> {
+    let queue = node.queue();
+    Box::new(node.children().flat_map(move |node| {
+        let node = Node::new(node, queue);
+        once(node).chain(children_recursive(node))
+    }))
+}
+
+fn children(node: Node<'_>) -> impl Iterator<Item = Node<'_>> + '_ {
+    let queue = node.queue();
+    node.children().map(move |node| Node::new(node, queue))
+}
+
+fn children_maybe_recursive(
+    node: Node<'_>,
+    recursive: bool,
+) -> Box<dyn Iterator<Item = Node<'_>> + '_> {
+    if recursive {
+        children_recursive(node)
+    } else {
+        Box::new(children(node))
+    }
+}
 
 #[allow(clippy::needless_pass_by_value)]
+#[track_caller]
 fn query_all<'tree>(
     node: Node<'tree>,
     by: By<'tree>,
 ) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
     let should_filter_labels = by.should_filter_labels();
 
-    let queue = node.queue();
-    let results = node
-        .filtered_children(move |node| {
-            if by.matches(&Node::new(*node, queue)) {
-                FilterResult::Include
-            } else {
-                FilterResult::ExcludeNode
-            }
-        })
-        .map(|node| Node::new(node, queue));
+    let results = children_maybe_recursive(node, by.recursive).filter(move |node| by.matches(node));
 
     let nodes = results.collect::<Vec<_>>();
 
@@ -48,6 +63,7 @@ fn query_all<'tree>(
 }
 
 #[allow(clippy::needless_pass_by_value)]
+#[track_caller]
 fn get_all<'tree>(
     node: Node<'tree>,
     by: By<'tree>,
@@ -56,12 +72,13 @@ fn get_all<'tree>(
     let mut iter = query_all(node, by).peekable();
     assert!(
         iter.peek().is_some(),
-        "No nodes found matching the query: {debug_query:?}"
+        "No nodes found matching the query:\n{debug_query:#?}\n\nOn node:\n{node:#?}"
     );
     iter
 }
 
 #[allow(clippy::needless_pass_by_value)]
+#[track_caller]
 fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
     let debug_query = by.debug_clone_without_predicate();
     let mut iter = query_all(node, by);
@@ -70,7 +87,7 @@ fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
     if let Some(second) = iter.next() {
         let first = result?;
         panic!(
-            "Found two or more nodes matching the query: \n{debug_query:?}\n\nFirst node: {first:?}\nSecond node: {second:?}\
+            "Found two or more nodes matching the query: \n{debug_query:#?}\n\nFirst node:\n{first:#?}\n\nSecond node: {second:#?}\
                 \n\nIf you were expecting multiple nodes, use query_all instead of query."
         );
     }
@@ -78,13 +95,14 @@ fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
 }
 
 #[allow(clippy::needless_pass_by_value)]
+#[track_caller]
 fn get<'tree>(node: Node<'tree>, by: By<'tree>) -> Node<'tree> {
     let debug_query = by.debug_clone_without_predicate();
     let option = query(node, by);
     if let Some(node) = option {
         node
     } else {
-        panic!("No nodes found matching the query: {debug_query:?}");
+        panic!("No nodes found matching the query:\n{debug_query:#?}\n\nOn node:\n{node:#?}");
     }
 }
 

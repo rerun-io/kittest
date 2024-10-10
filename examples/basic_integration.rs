@@ -13,7 +13,7 @@ pub struct Harness<'a> {
     /// the ui component that should be tested (for egui that's just a closure).
     app: Box<dyn FnMut(&egui::Context) + 'a>,
     /// The kittest State
-    state: kittest::State,
+    pub state: kittest::State,
 }
 
 impl<'a> Harness<'a> {

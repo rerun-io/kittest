@@ -3,11 +3,20 @@ use crate::query::Queryable;
 use crate::Node;
 use accesskit::TreeUpdate;
 use parking_lot::Mutex;
+use std::fmt::{Debug, Formatter};
 
 /// The kittest state
 pub struct State {
     tree: accesskit_consumer::Tree,
     queued_events: Mutex<Vec<Event>>,
+}
+
+impl Debug for State {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("State")
+            .field("tree", &self.node())
+            .finish_non_exhaustive()
+    }
 }
 
 pub(crate) type EventQueue = Mutex<Vec<Event>>;

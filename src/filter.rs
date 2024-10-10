@@ -19,6 +19,7 @@ pub struct By<'a> {
     had_predicate: bool,
     role: Option<Role>,
     value: Option<&'a str>,
+    pub(crate) recursive: bool,
 }
 
 impl<'a> Debug for By<'a> {
@@ -31,6 +32,7 @@ impl<'a> Debug for By<'a> {
             had_predicate,
             role,
             value,
+            recursive,
         } = self;
         let mut s = f.debug_struct("By");
         if let Some(name) = name {
@@ -51,6 +53,9 @@ impl<'a> Debug for By<'a> {
         }
         if let Some(value) = value {
             s.field("value", &value);
+        }
+        if !*recursive {
+            s.field("recursive", recursive);
         }
         s.finish()
     }
@@ -73,6 +78,7 @@ impl<'a> By<'a> {
             had_predicate: false,
             role: None,
             value: None,
+            recursive: true,
         }
     }
 
@@ -115,6 +121,13 @@ impl<'a> By<'a> {
         self
     }
 
+    /// Should we search recursively?
+    /// Default is true.
+    pub fn recursive(mut self, recursive: bool) -> Self {
+        self.recursive = recursive;
+        self
+    }
+
     /// Should the labels of labelled nodes be filtered?
     pub(crate) fn should_filter_labels(&self) -> bool {
         !self.include_labels && self.name.is_some()
@@ -133,12 +146,14 @@ impl<'a> By<'a> {
             had_predicate: self.had_predicate,
             role: self.role,
             value: self.value,
+            recursive: self.recursive,
         }
     }
 
     /// Returns true if the given node matches this filter.
     /// Note: For correct filtering if [`Self::include_labels`] is false, the tree should be
     /// filtered like in [`crate::Queryable::query_all`].
+    /// Note: Remember to check for recursive filtering
     pub(crate) fn matches(&self, node: &Node<'_>) -> bool {
         if let Some(name) = self.name {
             if let Some(node_name) = node.name() {
