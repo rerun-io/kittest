@@ -36,14 +36,12 @@ fn main() {
     let _check_me = harness.get(by().role(Role::CheckBox).name_contains("Check"));
 
     // You can also query children of a node
-    let _group = harness.get_by_name("My Group");
+    let group = harness.get_by_role_and_name(Role::Label, "My Group");
     // get_by_name won't panic here since we only find the button in the group
-    // TODO(lucas): Egui doesn't add node as children of their container right now
-    // group.get_by_name("Duplicate");
+    group.get_by_name("Duplicate");
 
-    // TODO(lucas): This should match once egui adds children to their containers
-    // let btn_in_parent = harness.get_all_by_name("Duplicate").next_back().unwrap();
-    // assert_eq!(btn_in_parent.parent_id().unwrap(), group.id());
+    let btn_in_parent = harness.get_all_by_name("Duplicate").next_back().unwrap();
+    assert_eq!(btn_in_parent.parent_id().unwrap(), group.id());
 
     // query_by and get_by functions will panic if more than one node is found
     // harness.get_by_role(Role::Button); // This will panic!
@@ -66,6 +64,7 @@ fn make_tree() -> Harness<'static> {
             let group_label = ui.label("My Group");
             _ = ui
                 .group(|ui| {
+                    // TODO(lucasmerlin): Egui should probably group widgets by their parent automatically
                     ui.ctx().clone().with_accessibility_parent(group_label.id, || {
                         _ = ui.button("Duplicate");
                     });

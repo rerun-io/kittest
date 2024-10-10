@@ -54,8 +54,8 @@ impl<'a> Debug for By<'a> {
         if let Some(value) = value {
             s.field("value", &value);
         }
-        if *recursive {
-            s.field("recursive", &true);
+        if !*recursive {
+            s.field("recursive", recursive);
         }
         s.finish()
     }
