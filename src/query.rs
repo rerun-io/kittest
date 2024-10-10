@@ -72,7 +72,7 @@ fn get_all<'tree>(
     let mut iter = query_all(node, by).peekable();
     assert!(
         iter.peek().is_some(),
-        "No nodes found matching the query: {debug_query:?}\n\nOn node: {node:?}"
+        "No nodes found matching the query:\n{debug_query:#?}\n\nOn node:\n{node:#?}"
     );
     iter
 }
@@ -87,7 +87,7 @@ fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
     if let Some(second) = iter.next() {
         let first = result?;
         panic!(
-            "Found two or more nodes matching the query: \n{debug_query:?}\n\nFirst node: {first:?}\nSecond node: {second:?}\
+            "Found two or more nodes matching the query: \n{debug_query:#?}\n\nFirst node:\n{first:#?}\n\nSecond node: {second:#?}\
                 \n\nIf you were expecting multiple nodes, use query_all instead of query."
         );
     }
@@ -102,7 +102,7 @@ fn get<'tree>(node: Node<'tree>, by: By<'tree>) -> Node<'tree> {
     if let Some(node) = option {
         node
     } else {
-        panic!("No nodes found matching the query: {debug_query:?}\n\nOn node: {node:?}");
+        panic!("No nodes found matching the query:\n{debug_query:#?}\n\nOn node:\n{node:#?}");
     }
 }
 
