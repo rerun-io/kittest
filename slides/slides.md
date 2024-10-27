@@ -24,6 +24,20 @@ By Lucas Meurer
 
 ---
 
+# Contents
+
+- What is kittest?
+- Query functions
+- Query Types
+- Helper methods
+- Example test (with egui_kittest)
+- How does a kittest integration look?
+- Pros
+- Cons
+- What else could be part of kittest?
+
+---
+
 # What is kittest?
 
 - Thin layer over [accesskit_consumer](https://github.com/AccessKit/accesskit/tree/main/consumer)
