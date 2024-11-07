@@ -39,7 +39,7 @@ By Lucas Meurer
 ---
 
 # What is kittest?
-
+- Opinionated UI testing library based on AccessKit
 - Thin layer over [accesskit_consumer](https://github.com/AccessKit/accesskit/tree/main/consumer)
 - Provides convenient api to 
   - query the AccessKit node tree
