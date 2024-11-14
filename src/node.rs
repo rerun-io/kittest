@@ -18,8 +18,8 @@ impl<'a> Debug for Node<'a> {
         let mut s = f.debug_struct("Node");
         s.field("id", &self.node.id());
         s.field("role", &self.node.role());
-        if let Some(name) = self.node.name() {
-            s.field("name", &name);
+        if let Some(label) = self.node.label() {
+            s.field("label", &label);
         }
         if let Some(value) = self.node.value() {
             s.field("value", &value);
@@ -80,7 +80,7 @@ impl<'tree> Node<'tree> {
     pub fn click(&self) {
         self.event(Event::ActionRequest(ActionRequest {
             data: None,
-            action: accesskit::Action::Default,
+            action: accesskit::Action::Click,
             target: self.node.id(),
         }));
     }

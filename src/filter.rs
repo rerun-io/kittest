@@ -11,8 +11,8 @@ pub fn by<'a>() -> By<'a> {
 /// A filter for nodes.
 /// The filters are combined with a logical AND.
 pub struct By<'a> {
-    name: Option<&'a str>,
-    name_contains: bool,
+    label: Option<&'a str>,
+    label_contains: bool,
     include_labels: bool,
     #[allow(clippy::type_complexity)]
     predicate: Option<Box<dyn Fn(&Node<'_>) -> bool + 'a>>,
@@ -25,8 +25,8 @@ pub struct By<'a> {
 impl<'a> Debug for By<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let By {
-            name,
-            name_contains,
+            label,
+            label_contains,
             include_labels,
             predicate,
             had_predicate,
@@ -35,11 +35,11 @@ impl<'a> Debug for By<'a> {
             recursive,
         } = self;
         let mut s = f.debug_struct("By");
-        if let Some(name) = name {
-            if *name_contains {
-                s.field("name_contains", &name);
+        if let Some(label) = label {
+            if *label_contains {
+                s.field("label_contains", &label);
             } else {
-                s.field("name", &name);
+                s.field("label", &label);
             }
         }
         if *include_labels {
@@ -71,8 +71,8 @@ impl<'a> By<'a> {
     /// Create an empty filter.
     pub fn new() -> Self {
         Self {
-            name: None,
-            name_contains: false,
+            label: None,
+            label_contains: false,
             include_labels: false,
             predicate: None,
             had_predicate: false,
@@ -82,16 +82,16 @@ impl<'a> By<'a> {
         }
     }
 
-    /// Filter by the name of the node with an exact match.
-    pub fn name(mut self, name: &'a str) -> Self {
-        self.name = Some(name);
+    /// Filter by the label of the node with an exact match.
+    pub fn label(mut self, label: &'a str) -> Self {
+        self.label = Some(label);
         self
     }
 
-    /// Filter by the name of the node with a substring match.
-    pub fn name_contains(mut self, name: &'a str) -> Self {
-        self.name = Some(name);
-        self.name_contains = true;
+    /// Filter by the label of the node with a substring match.
+    pub fn label_contains(mut self, label: &'a str) -> Self {
+        self.label = Some(label);
+        self.label_contains = true;
         self
     }
 
@@ -130,7 +130,7 @@ impl<'a> By<'a> {
 
     /// Should the labels of labelled nodes be filtered?
     pub(crate) fn should_filter_labels(&self) -> bool {
-        !self.include_labels && self.name.is_some()
+        !self.include_labels && self.label.is_some()
     }
 
     /// Since we can't clone the predicate, we can't implement Clone for By.
@@ -139,8 +139,8 @@ impl<'a> By<'a> {
     /// just remember if we had one.
     pub(crate) fn debug_clone_without_predicate(&self) -> Self {
         Self {
-            name: self.name,
-            name_contains: self.name_contains,
+            label: self.label,
+            label_contains: self.label_contains,
             include_labels: self.include_labels,
             predicate: None,
             had_predicate: self.had_predicate,
@@ -155,13 +155,13 @@ impl<'a> By<'a> {
     /// filtered like in [`crate::Queryable::query_all`].
     /// Note: Remember to check for recursive filtering
     pub(crate) fn matches(&self, node: &Node<'_>) -> bool {
-        if let Some(name) = self.name {
-            if let Some(node_name) = node.name() {
-                if self.name_contains {
-                    if !node_name.contains(name) {
+        if let Some(label) = self.label {
+            if let Some(node_label) = node.label() {
+                if self.label_contains {
+                    if !node_label.contains(label) {
                         return false;
                     }
-                } else if node_name != name {
+                } else if node_label != label {
                     return false;
                 }
             } else {

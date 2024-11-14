@@ -12,36 +12,36 @@ use kittest::{by, Queryable};
 fn main() {
     let harness = make_tree();
 
-    // You can query nodes by their name (query_by_* functions always return an Option<Node>)
+    // You can query nodes by their label (query_by_* functions always return an Option<Node>)
     let _button_1 = harness
-        .query_by_name("Button 1")
+        .query_by_label("Button 1")
         .expect("Button 1 not found");
 
-    // You can get nodes by their name (get_by_* functions will panic with a helpful error message
+    // You can get nodes by their label (get_by_* functions will panic with a helpful error message
     // if the node is not found)
-    let _button_2 = harness.get_by_name("Button 2");
+    let _button_2 = harness.get_by_label("Button 2");
 
-    // You can get all nodes with a certain name
-    let buttons = harness.query_all_by_name("Duplicate");
+    // You can get all nodes with a certain label
+    let buttons = harness.query_all_by_label("Duplicate");
     assert_eq!(
         buttons.count(),
         2,
-        "Expected 2 buttons with the name 'Duplicate'"
+        "Expected 2 buttons with the label 'Duplicate'"
     );
 
-    // If you have multiple items with the same name, you can query by name and role
-    let _submit = harness.get_by_role_and_name(Role::Button, "Submit");
+    // If you have multiple items with the same label, you can query by label and role
+    let _submit = harness.get_by_role_and_label(Role::Button, "Submit");
 
     // If you need more complex queries, you can use the by struct
-    let _check_me = harness.get(by().role(Role::CheckBox).name_contains("Check"));
+    let _check_me = harness.get(by().role(Role::CheckBox).label_contains("Check"));
 
     // You can also query children of a node
-    let group = harness.get_by_role_and_name(Role::Label, "My Group");
-    // get_by_name won't panic here since we only find the button in the group
-    group.get_by_name("Duplicate");
+    let group = harness.get_by_role_and_label(Role::Label, "My Group");
+    // get_by_label won't panic here since we only find the button in the group
+    group.get_by_label("Duplicate");
 
     let btn_in_parent = harness
-        .get_all_by_name("Duplicate")
+        .get_all_by_label("Duplicate")
         .next_back()
         .expect("No buttons found");
     assert_eq!(
