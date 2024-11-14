@@ -25,12 +25,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef7442f1f520649b8e11ee3af6caeec24123fed4b63bc36a85b67308d8514fdf"
 
 [[package]]
-name = "accesskit_consumer"
-version = "0.24.1"
+name = "accesskit"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7072a4f17b8e7440a88ce08eb657d1ec84be061b1a94be78f9699aa18e583885"
+checksum = "45c97bb3cc1dacbdc6d1147040fc61309590d3e1ab5efd92a8a09c7a2e07284c"
+
+[[package]]
+name = "accesskit_consumer"
+version = "0.25.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa3a17950ce0d911f132387777b9b3d05eddafb59b773ccaa53fceefaeb0228e"
 dependencies = [
- "accesskit",
+ "accesskit 0.17.0",
  "immutable-chunkmap",
 ]
 
@@ -83,7 +89,7 @@ name = "egui"
 version = "0.28.1"
 source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
 dependencies = [
- "accesskit",
+ "accesskit 0.16.1",
  "ahash",
  "emath",
  "epaint",
@@ -127,7 +133,7 @@ dependencies = [
 name = "kittest"
 version = "0.1.0"
 dependencies = [
- "accesskit",
+ "accesskit 0.17.0",
  "accesskit_consumer",
  "egui",
  "parking_lot",

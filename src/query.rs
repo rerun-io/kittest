@@ -39,7 +39,7 @@ fn query_all<'tree>(
 
     let nodes = results.collect::<Vec<_>>();
 
-    // If the widget label is provided by a different node, both will have the same name.
+    // If the widget label is provided by a different node, both will have the same label.
     // We only want to return the node that is labelled by the other node, not the label node.
     // (This matches the behavior of the testing-library getByLabelText query.)
     let labels: BTreeSet<_> = if should_filter_labels {
@@ -109,10 +109,10 @@ fn get<'tree>(node: Node<'tree>, by: By<'tree>) -> Node<'tree> {
 macro_rules! impl_helper {
     (
         $match_doc:literal,
-        $query_all_name:ident,
-        $get_all_name:ident,
-        $query_name:ident,
-        $get_name:ident,
+        $query_all_label:ident,
+        $get_all_label:ident,
+        $query_label:ident,
+        $get_label:ident,
         ($($args:ident: $arg_ty:ty),*),
         $by_expr:expr,
         $(#[$extra_doc:meta])*
@@ -121,7 +121,7 @@ macro_rules! impl_helper {
         #[doc = $match_doc]
         $(#[$extra_doc])*
         #[track_caller]
-        fn $query_all_name(
+        fn $query_all_label(
             &'node self, $($args: $arg_ty),*
         ) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
             query_all(self.node(), $by_expr)
@@ -135,7 +135,7 @@ macro_rules! impl_helper {
         /// # Panics
         /// - if no nodes are found matching the query.
         #[track_caller]
-        fn $get_all_name(
+        fn $get_all_label(
             &'node self, $($args: $arg_ty),*
         ) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
             get_all(self.node(), $by_expr)
@@ -146,7 +146,7 @@ macro_rules! impl_helper {
         /// Returns `None` if no nodes are found.
         $(#[$extra_doc])*
         #[track_caller]
-        fn $query_name(&'node self, $($args: $arg_ty),*) -> Option<Node<'tree>> {
+        fn $query_label(&'node self, $($args: $arg_ty),*) -> Option<Node<'tree>> {
             query(self.node(), $by_expr)
         }
 
@@ -158,7 +158,7 @@ macro_rules! impl_helper {
         /// - if no nodes are found matching the query.
         /// - if more than one node is found matching the query.
         #[track_caller]
-        fn $get_name(&'node self, $($args: $arg_ty),*) -> Node<'tree> {
+        fn $get_label(&'node self, $($args: $arg_ty),*) -> Node<'tree> {
             get(self.node(), $by_expr)
         }
     };
@@ -179,37 +179,37 @@ pub trait Queryable<'tree, 'node> {
     );
 
     impl_helper!(
-        "the node name exactly matches given name.",
-        query_all_by_name,
-        get_all_by_name,
-        query_by_name,
-        get_by_name,
-        (name: &'tree str),
-        By::new().name(name),
+        "the node label exactly matches given label.",
+        query_all_by_label,
+        get_all_by_label,
+        query_by_label,
+        get_by_label,
+        (label: &'tree str),
+        By::new().label(label),
         #[doc = ""]
         #[doc = "If a node is labelled by another node, the label node will not be included in the results."]
     );
 
     impl_helper!(
-        "the node name contains the given substring.",
-        query_all_by_name_contains,
-        get_all_by_name_contains,
-        query_by_name_contains,
-        get_by_name_contains,
-        (name: &'tree str),
-        By::new().name_contains(name),
+        "the node label contains the given substring.",
+        query_all_by_label_contains,
+        get_all_by_label_contains,
+        query_by_label_contains,
+        get_by_label_contains,
+        (label: &'tree str),
+        By::new().label_contains(label),
         #[doc = ""]
         #[doc = "If a node is labelled by another node, the label node will not be included in the results."]
     );
 
     impl_helper!(
-        "the node role and name exactly match the given role and name.",
-        query_all_by_role_and_name,
-        get_all_by_role_and_name,
-        query_by_role_and_name,
-        get_by_role_and_name,
-        (role: accesskit::Role, name: &'tree str),
-        By::new().role(role).name(name),
+        "the node role and label exactly match the given role and label.",
+        query_all_by_role_and_label,
+        get_all_by_role_and_label,
+        query_by_role_and_label,
+        get_by_role_and_label,
+        (role: accesskit::Role, label: &'tree str),
+        By::new().role(role).label(label),
         #[doc = ""]
         #[doc = "If a node is labelled by another node, the label node will not be included in the results."]
     );

@@ -83,7 +83,7 @@ fn main() {
         });
     });
 
-    harness.get_by_name("Check me!").click();
+    harness.get_by_label("Check me!").click();
     harness.run_frame();
 
     drop(harness);
