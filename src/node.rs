@@ -96,6 +96,7 @@ impl<'tree> Node<'tree> {
 
     /// Simulate a click event at the node center
     pub fn simulate_click(&self) {
+        self.hover();
         ElementState::click().for_each(|state| {
             self.event(Event::Simulated(SimulatedEvent::MouseInput {
                 button: MouseButton::Left,
