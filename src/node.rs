@@ -88,7 +88,7 @@ impl<'tree> Node<'tree> {
     /// Hover the cursor at the node center
     pub fn hover(&self) {
         let rect = self.node.raw_bounds().expect("Node has no bounds");
-        let center = Vec2::new(rect.x0 + rect.x1 / 2.0, rect.y0 + rect.y1 / 2.0);
+        let center = Vec2::new((rect.x0 + rect.x1) / 2.0, (rect.y0 + rect.y1) / 2.0);
         self.event(Event::Simulated(SimulatedEvent::CursorMoved {
             position: center,
         }));
