@@ -76,7 +76,7 @@ impl<'tree> Node<'tree> {
         }));
     }
 
-    /// Click the node via accesskit. This will trigger a [`accesskit::Action::Default`] action
+    /// Click the node via accesskit. This will trigger a [`accesskit::Action::Click`] action
     pub fn click(&self) {
         self.event(Event::ActionRequest(ActionRequest {
             data: None,
