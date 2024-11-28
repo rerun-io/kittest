@@ -83,12 +83,20 @@ impl<'a> By<'a> {
     }
 
     /// Filter by the label of the node with an exact match.
+    ///
+    /// Note that [in AccessKit](https://docs.rs/accesskit/latest/accesskit/struct.Node.html#method.label),
+    /// a widget with `Role::Label`, stores it's label in `Node::value`.
+    /// We check for this and use the value if the role is `Role::Label`.
     pub fn label(mut self, label: &'a str) -> Self {
         self.label = Some(label);
         self
     }
 
     /// Filter by the label of the node with a substring match.
+    ///
+    /// Note that [in AccessKit](https://docs.rs/accesskit/latest/accesskit/struct.Node.html#method.label),
+    /// a widget with `Role::Label`, stores it's label in `Node::value`.
+    /// We check for this and use the value if the role is `Role::Label`.
     pub fn label_contains(mut self, label: &'a str) -> Self {
         self.label = Some(label);
         self.label_contains = true;
@@ -156,7 +164,14 @@ impl<'a> By<'a> {
     /// Note: Remember to check for recursive filtering
     pub(crate) fn matches(&self, node: &Node<'_>) -> bool {
         if let Some(label) = self.label {
-            if let Some(node_label) = node.label() {
+            // In AccessKit, a widget with `Role::Label`, stores it's label in `Node::value`.
+            let node_label = if node.role() == Role::Label {
+                node.value()
+            } else {
+                node.label()
+            };
+
+            if let Some(node_label) = node_label {
                 if self.label_contains {
                     if !node_label.contains(label) {
                         return false;

@@ -76,7 +76,7 @@ impl<'tree> Node<'tree> {
         }));
     }
 
-    /// Click the node via accesskit. This will trigger a [`accesskit::Action::Default`] action
+    /// Click the node via accesskit. This will trigger a [`accesskit::Action::Click`] action
     pub fn click(&self) {
         self.event(Event::ActionRequest(ActionRequest {
             data: None,
@@ -88,7 +88,7 @@ impl<'tree> Node<'tree> {
     /// Hover the cursor at the node center
     pub fn hover(&self) {
         let rect = self.node.raw_bounds().expect("Node has no bounds");
-        let center = Vec2::new(rect.x0 + rect.x1 / 2.0, rect.y0 + rect.y1 / 2.0);
+        let center = Vec2::new((rect.x0 + rect.x1) / 2.0, (rect.y0 + rect.y1) / 2.0);
         self.event(Event::Simulated(SimulatedEvent::CursorMoved {
             position: center,
         }));
@@ -96,6 +96,7 @@ impl<'tree> Node<'tree> {
 
     /// Simulate a click event at the node center
     pub fn simulate_click(&self) {
+        self.hover();
         ElementState::click().for_each(|state| {
             self.event(Event::Simulated(SimulatedEvent::MouseInput {
                 button: MouseButton::Left,

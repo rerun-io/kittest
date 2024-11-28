@@ -20,15 +20,9 @@ checksum = "c71b1793ee61086797f5c80b6efa2b8ffa6d5dd703f118545808a7f2e27f7046"
 
 [[package]]
 name = "accesskit"
-version = "0.16.1"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef7442f1f520649b8e11ee3af6caeec24123fed4b63bc36a85b67308d8514fdf"
-
-[[package]]
-name = "accesskit"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45c97bb3cc1dacbdc6d1147040fc61309590d3e1ab5efd92a8a09c7a2e07284c"
+checksum = "d3d3b8f9bae46a948369bc4a03e815d4ed6d616bd00de4051133a5019dc31c5a"
 
 [[package]]
 name = "accesskit_consumer"
@@ -36,7 +30,7 @@ version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fa3a17950ce0d911f132387777b9b3d05eddafb59b773ccaa53fceefaeb0228e"
 dependencies = [
- "accesskit 0.17.0",
+ "accesskit",
  "immutable-chunkmap",
 ]
 
@@ -78,18 +72,18 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "ecolor"
-version = "0.28.1"
-source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
+version = "0.29.1"
+source = "git+https://github.com/emilk/egui?rev=84cc1572b175d49a64f1b323a6d7e56b1f1fba66#84cc1572b175d49a64f1b323a6d7e56b1f1fba66"
 dependencies = [
  "emath",
 ]
 
 [[package]]
 name = "egui"
-version = "0.28.1"
-source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
+version = "0.29.1"
+source = "git+https://github.com/emilk/egui?rev=84cc1572b175d49a64f1b323a6d7e56b1f1fba66#84cc1572b175d49a64f1b323a6d7e56b1f1fba66"
 dependencies = [
- "accesskit 0.16.1",
+ "accesskit",
  "ahash",
  "emath",
  "epaint",
@@ -98,13 +92,13 @@ dependencies = [
 
 [[package]]
 name = "emath"
-version = "0.28.1"
-source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
+version = "0.29.1"
+source = "git+https://github.com/emilk/egui?rev=84cc1572b175d49a64f1b323a6d7e56b1f1fba66#84cc1572b175d49a64f1b323a6d7e56b1f1fba66"
 
 [[package]]
 name = "epaint"
-version = "0.28.1"
-source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
+version = "0.29.1"
+source = "git+https://github.com/emilk/egui?rev=84cc1572b175d49a64f1b323a6d7e56b1f1fba66#84cc1572b175d49a64f1b323a6d7e56b1f1fba66"
 dependencies = [
  "ab_glyph",
  "ahash",
@@ -117,8 +111,8 @@ dependencies = [
 
 [[package]]
 name = "epaint_default_fonts"
-version = "0.28.1"
-source = "git+https://github.com/emilk/egui?rev=dae1979dd334ace310b6e3ef02e98281ed7dfb8e#dae1979dd334ace310b6e3ef02e98281ed7dfb8e"
+version = "0.29.1"
+source = "git+https://github.com/emilk/egui?rev=84cc1572b175d49a64f1b323a6d7e56b1f1fba66#84cc1572b175d49a64f1b323a6d7e56b1f1fba66"
 
 [[package]]
 name = "immutable-chunkmap"
@@ -133,7 +127,7 @@ dependencies = [
 name = "kittest"
 version = "0.1.0"
 dependencies = [
- "accesskit 0.17.0",
+ "accesskit",
  "accesskit_consumer",
  "egui",
  "parking_lot",
