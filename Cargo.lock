@@ -25,12 +25,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3d3b8f9bae46a948369bc4a03e815d4ed6d616bd00de4051133a5019dc31c5a"
 
 [[package]]
-name = "accesskit_consumer"
-version = "0.25.0"
+name = "accesskit"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa3a17950ce0d911f132387777b9b3d05eddafb59b773ccaa53fceefaeb0228e"
+checksum = "becf0eb5215b6ecb0a739c31c21bd83c4f326524c9b46b7e882d77559b60a529"
+
+[[package]]
+name = "accesskit_consumer"
+version = "0.27.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0bf66a7bf0b7ea4fd7742d50b64782a88f99217cf246b3f93b4162528dde520"
 dependencies = [
- "accesskit",
+ "accesskit 0.18.0",
+ "hashbrown",
  "immutable-chunkmap",
 ]
 
@@ -83,7 +90,7 @@ name = "egui"
 version = "0.29.1"
 source = "git+https://github.com/emilk/egui?rev=84cc1572b175d49a64f1b323a6d7e56b1f1fba66#84cc1572b175d49a64f1b323a6d7e56b1f1fba66"
 dependencies = [
- "accesskit",
+ "accesskit 0.17.1",
  "ahash",
  "emath",
  "epaint",
@@ -115,10 +122,25 @@ version = "0.29.1"
 source = "git+https://github.com/emilk/egui?rev=84cc1572b175d49a64f1b323a6d7e56b1f1fba66#84cc1572b175d49a64f1b323a6d7e56b1f1fba66"
 
 [[package]]
-name = "immutable-chunkmap"
-version = "2.0.5"
+name = "foldhash"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4419f022e55cc63d5bbd6b44b71e1d226b9c9480a47824c706e9d54e5c40c5eb"
+checksum = "a0d2fde1f7b3d48b8395d5f2de76c18a528bd6a9cdde438df747bfcba3e05d6f"
+
+[[package]]
+name = "hashbrown"
+version = "0.15.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
+dependencies = [
+ "foldhash",
+]
+
+[[package]]
+name = "immutable-chunkmap"
+version = "2.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12f97096f508d54f8f8ab8957862eee2ccd628847b6217af1a335e1c44dee578"
 dependencies = [
  "arrayvec",
 ]
@@ -127,7 +149,7 @@ dependencies = [
 name = "kittest"
 version = "0.1.0"
 dependencies = [
- "accesskit",
+ "accesskit 0.18.0",
  "accesskit_consumer",
  "egui",
  "parking_lot",
