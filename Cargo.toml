@@ -11,7 +11,7 @@ name = "kittest"
 publish = true
 readme = "README.md"
 repository = "https://github.com/rerun-io/kittest"
-rust-version = "1.77"
+rust-version = "1.81"
 version = "0.1.0"
 
 [package.metadata.docs.rs]
@@ -42,9 +42,9 @@ workspace = true
 unsafe_code = "deny"
 
 elided_lifetimes_in_paths = "warn"
-future_incompatible = "warn"
-nonstandard_style = "warn"
-rust_2018_idioms = "warn"
+future_incompatible = { level = "warn", priority = -1 }
+nonstandard_style = { level = "warn", priority = -1 }
+rust_2018_idioms = { level = "warn", priority = -1 }
 rust_2021_prelude_collisions = "warn"
 semicolon_in_expressions_from_macros = "warn"
 trivial_numeric_casts = "warn"
@@ -134,7 +134,6 @@ match_same_arms = "warn"
 match_wild_err_arm = "warn"
 match_wildcard_for_single_variants = "warn"
 mem_forget = "warn"
-mismatched_target_os = "warn"
 mismatching_type_param_order = "warn"
 missing_assert_message = "warn"
 missing_enforced_import_renames = "warn"
