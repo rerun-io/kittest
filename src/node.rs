@@ -179,13 +179,13 @@ impl<'tree> Node<'tree> {
     }
 
     /// Get the parent of the node
-    pub fn parent(&self) -> Option<Node<'tree>> {
+    pub fn parent(&self) -> Option<Self> {
         self.node.parent().map(|node| Node::new(node, self.queue))
     }
 }
 
 impl<'t, 'n> Queryable<'t, 'n> for Node<'t> {
-    fn node(&'n self) -> Node<'t> {
+    fn node(&'n self) -> Self {
         Node::new(self.node, self.queue)
     }
 }
