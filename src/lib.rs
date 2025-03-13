@@ -1,3 +1,4 @@
+#![allow(clippy::doc_markdown)]
 #![doc = include_str!("../README.md")]
 mod event;
 mod filter;

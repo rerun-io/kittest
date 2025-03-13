@@ -17,7 +17,7 @@ pub struct Harness<'a> {
 }
 
 impl<'a> Harness<'a> {
-    pub fn new(mut app: impl FnMut(&egui::Context) + 'a) -> Harness<'a> {
+    pub fn new(mut app: impl FnMut(&egui::Context) + 'a) -> Self {
         let ctx = egui::Context::default();
         ctx.enable_accesskit();
 
