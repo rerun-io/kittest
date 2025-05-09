@@ -24,8 +24,8 @@ default = []
 
 
 [dependencies]
-accesskit_consumer = "0.27.0"
-accesskit = "0.18.0"
+accesskit_consumer = "0.28.0"
+accesskit = "0.19.0"
 parking_lot = "0.12"
 
 [dev-dependencies]
