@@ -21,6 +21,28 @@ impl Debug for State {
 
 pub(crate) type EventQueue = Mutex<Vec<Event>>;
 
+struct NoOpChangeHandler;
+
+impl accesskit_consumer::TreeChangeHandler for NoOpChangeHandler {
+    fn node_added(&mut self, _node: &accesskit_consumer::Node<'_>) {}
+
+    fn node_updated(
+        &mut self,
+        _old_node: &accesskit_consumer::Node<'_>,
+        _new_node: &accesskit_consumer::Node<'_>,
+    ) {
+    }
+
+    fn focus_moved(
+        &mut self,
+        _old_node: Option<&accesskit_consumer::Node<'_>>,
+        _new_node: Option<&accesskit_consumer::Node<'_>>,
+    ) {
+    }
+
+    fn node_removed(&mut self, _node: &accesskit_consumer::Node<'_>) {}
+}
+
 impl State {
     /// Create a new State from a `TreeUpdate`
     pub fn new(update: TreeUpdate) -> Self {
@@ -32,7 +54,8 @@ impl State {
 
     /// Update the state with a new `TreeUpdate` (this should be called after each frame)
     pub fn update(&mut self, update: accesskit::TreeUpdate) {
-        self.tree.update(update);
+        self.tree
+            .update_and_process_changes(update, &mut NoOpChangeHandler);
     }
 
     /// Get the root node
