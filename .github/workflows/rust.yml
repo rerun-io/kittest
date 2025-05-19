@@ -91,23 +91,25 @@ jobs:
           command: test
           args: --all-features
 
-      - name: Run basic_integration example
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --example basic_integration
-
-      - name: Run querying example
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --example querying
-
       - name: Clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: --all-targets --all-features -- -D warnings
+
+      # Disabled due to accesskit version mismatch between this repo and egui.
+      # See also examples_/README.md
+      # - name: Run basic_integration example
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: run
+      #     args: --example basic_integration
+
+      # - name: Run querying example
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: run
+      #     args: --example querying
 
   # ---------------------------------------------------------------------------
 
