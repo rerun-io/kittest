@@ -97,19 +97,17 @@ jobs:
           command: clippy
           args: --all-targets --all-features -- -D warnings
 
-      # Disabled due to accesskit version mismatch between this repo and egui.
-      # See also examples_/README.md
-      # - name: Run basic_integration example
-      #   uses: actions-rs/cargo@v1
-      #   with:
-      #     command: run
-      #     args: --example basic_integration
+      - name: Run basic_integration example
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example basic_integration
 
-      # - name: Run querying example
-      #   uses: actions-rs/cargo@v1
-      #   with:
-      #     command: run
-      #     args: --example querying
+      - name: Run querying example
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example querying
 
   # ---------------------------------------------------------------------------
 
@@ -146,9 +144,9 @@ jobs:
     name: Check Rust dependencies (cargo-deny)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: EmbarkStudios/cargo-deny-action@v1
-      with:
-        rust-version: "1.84.0"
-        log-level: warn
-        command: check
+      - uses: actions/checkout@v3
+      - uses: EmbarkStudios/cargo-deny-action@v1
+        with:
+          rust-version: "1.84.0"
+          log-level: warn
+          command: check
