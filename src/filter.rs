@@ -22,7 +22,7 @@ pub struct By<'a> {
     pub(crate) recursive: bool,
 }
 
-impl<'a> Debug for By<'a> {
+impl Debug for By<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let By {
             label,
@@ -61,7 +61,7 @@ impl<'a> Debug for By<'a> {
     }
 }
 
-impl<'a> Default for By<'a> {
+impl Default for By<'_> {
     fn default() -> Self {
         Self::new()
     }

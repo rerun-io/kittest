@@ -66,7 +66,7 @@ impl<'a> Harness<'a> {
 }
 
 // This allows us to directly query the harness as if it's the root node.
-impl<'tree, 'node, 'app> Queryable<'tree, 'node> for Harness<'app>
+impl<'tree, 'node> Queryable<'tree, 'node> for Harness<'_>
 where
     'node: 'tree,
 {
