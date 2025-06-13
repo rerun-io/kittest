@@ -13,7 +13,7 @@ pub struct Node<'tree> {
     pub(crate) queue: &'tree EventQueue,
 }
 
-impl<'a> Debug for Node<'a> {
+impl Debug for Node<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut s = f.debug_struct("Node");
         s.field("id", &self.node.id());
