@@ -1,41 +1,19 @@
 use crate::filter::By;
-use crate::Node;
+use crate::{AccessKitNode, NodeT};
 use std::collections::BTreeSet;
-use std::iter::{once, FusedIterator};
-
-fn children_recursive(node: Node<'_>) -> Box<dyn Iterator<Item = Node<'_>> + '_> {
-    let queue = node.queue();
-    Box::new(node.children().flat_map(move |node| {
-        let node = Node::new(node, queue);
-        once(node).chain(children_recursive(node))
-    }))
-}
-
-fn children(node: Node<'_>) -> impl Iterator<Item = Node<'_>> + '_ {
-    let queue = node.queue();
-    node.children().map(move |node| Node::new(node, queue))
-}
-
-fn children_maybe_recursive(
-    node: Node<'_>,
-    recursive: bool,
-) -> Box<dyn Iterator<Item = Node<'_>> + '_> {
-    if recursive {
-        children_recursive(node)
-    } else {
-        Box::new(children(node))
-    }
-}
+use std::iter::FusedIterator;
 
 #[allow(clippy::needless_pass_by_value)]
 #[track_caller]
-fn query_all<'tree>(
-    node: Node<'tree>,
+fn query_all<'tree, Node: NodeT<'tree> + 'tree>(
+    node: Node,
     by: By<'tree>,
-) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
+) -> impl DoubleEndedIterator<Item = Node> + FusedIterator<Item = Node> + 'tree {
     let should_filter_labels = by.should_filter_labels();
 
-    let results = children_maybe_recursive(node, by.recursive).filter(move |node| by.matches(node));
+    let results = node
+        .children_maybe_recursive(by.recursive)
+        .filter(move |node| by.matches(&node.accesskit_node()));
 
     let nodes = results.collect::<Vec<_>>();
 
@@ -46,7 +24,7 @@ fn query_all<'tree>(
         nodes
             .iter()
             // TODO(lucas): It would be nicer if we could just get ids via something like labelled_by_ids
-            .flat_map(|node| node.labelled_by())
+            .flat_map(|node| node.accesskit_node().labelled_by())
             .map(|node| node.id())
             .collect()
     } else {
@@ -55,7 +33,7 @@ fn query_all<'tree>(
 
     nodes.into_iter().filter(move |node| {
         if should_filter_labels {
-            !labels.contains(&node.id())
+            !labels.contains(&node.accesskit_node().id())
         } else {
             true
         }
@@ -64,12 +42,12 @@ fn query_all<'tree>(
 
 #[allow(clippy::needless_pass_by_value)]
 #[track_caller]
-fn get_all<'tree>(
-    node: Node<'tree>,
+fn get_all<'tree, Node: NodeT<'tree> + 'tree>(
+    node: Node,
     by: By<'tree>,
-) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
+) -> impl DoubleEndedIterator<Item = Node> + FusedIterator<Item = Node> + 'tree {
     let debug_query = by.debug_clone_without_predicate();
-    let mut iter = query_all(node, by).peekable();
+    let mut iter = query_all(node.clone(), by).peekable();
     assert!(
         iter.peek().is_some(),
         "No nodes found matching the query:\n{debug_query:#?}\n\nOn node:\n{node:#?}"
@@ -79,7 +57,7 @@ fn get_all<'tree>(
 
 #[allow(clippy::needless_pass_by_value)]
 #[track_caller]
-fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
+fn query<'tree, Node: NodeT<'tree> + 'tree>(node: Node, by: By<'tree>) -> Option<Node> {
     let debug_query = by.debug_clone_without_predicate();
     let mut iter = query_all(node, by);
     let result = iter.next();
@@ -96,9 +74,9 @@ fn query<'tree>(node: Node<'tree>, by: By<'tree>) -> Option<Node<'tree>> {
 
 #[allow(clippy::needless_pass_by_value)]
 #[track_caller]
-fn get<'tree>(node: Node<'tree>, by: By<'tree>) -> Node<'tree> {
+fn get<'tree, Node: NodeT<'tree> + 'tree>(node: Node, by: By<'tree>) -> Node {
     let debug_query = by.debug_clone_without_predicate();
-    let option = query(node, by);
+    let option = query(node.clone(), by);
     if let Some(node) = option {
         node
     } else {
@@ -113,6 +91,7 @@ macro_rules! impl_helper {
         $get_all_label:ident,
         $query_label:ident,
         $get_label:ident,
+        $node:ident,
         ($($args:ident: $arg_ty:ty),*),
         $by_expr:expr,
         $(#[$extra_doc:meta])*
@@ -123,8 +102,8 @@ macro_rules! impl_helper {
         #[track_caller]
         fn $query_all_label(
             &'node self, $($args: $arg_ty),*
-        ) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
-            query_all(self.node(), $by_expr)
+        ) -> impl DoubleEndedIterator<Item = $node> + FusedIterator<Item = $node> + 'tree {
+            query_all(self.queryable_node(), $by_expr)
         }
 
         /// Get all nodes in the tree where
@@ -137,8 +116,8 @@ macro_rules! impl_helper {
         #[track_caller]
         fn $get_all_label(
             &'node self, $($args: $arg_ty),*
-        ) -> impl DoubleEndedIterator<Item = Node<'tree>> + FusedIterator<Item = Node<'tree>> + 'tree {
-            get_all(self.node(), $by_expr)
+        ) -> impl DoubleEndedIterator<Item = $node> + FusedIterator<Item = $node> + 'tree {
+            get_all(self.queryable_node(), $by_expr)
         }
 
         /// Query a single node in the tree where
@@ -146,8 +125,8 @@ macro_rules! impl_helper {
         /// Returns `None` if no nodes are found.
         $(#[$extra_doc])*
         #[track_caller]
-        fn $query_label(&'node self, $($args: $arg_ty),*) -> Option<Node<'tree>> {
-            query(self.node(), $by_expr)
+        fn $query_label(&'node self, $($args: $arg_ty),*) -> Option<$node> {
+            query(self.queryable_node(), $by_expr)
         }
 
         /// Get a single node in the tree where
@@ -158,15 +137,15 @@ macro_rules! impl_helper {
         /// - if no nodes are found matching the query.
         /// - if more than one node is found matching the query.
         #[track_caller]
-        fn $get_label(&'node self, $($args: $arg_ty),*) -> Node<'tree> {
-            get(self.node(), $by_expr)
+        fn $get_label(&'node self, $($args: $arg_ty),*) -> $node {
+            get(self.queryable_node(), $by_expr)
         }
     };
 }
 
 /// Provides convenience methods for querying nodes in the tree, inspired by <https://testing-library.com/>.
-pub trait Queryable<'tree, 'node> {
-    fn node(&'node self) -> crate::Node<'tree>;
+pub trait Queryable<'tree, 'node, Node: NodeT<'tree> + 'tree> {
+    fn queryable_node(&'node self) -> Node;
 
     impl_helper!(
         "the node matches the given [`By`] filter.",
@@ -174,6 +153,7 @@ pub trait Queryable<'tree, 'node> {
         get_all,
         query,
         get,
+        Node,
         (by: By<'tree>),
         by,
     );
@@ -184,6 +164,7 @@ pub trait Queryable<'tree, 'node> {
         get_all_by_label,
         query_by_label,
         get_by_label,
+        Node,
         (label: &'tree str),
         By::new().label(label),
         #[doc = ""]
@@ -196,6 +177,7 @@ pub trait Queryable<'tree, 'node> {
         get_all_by_label_contains,
         query_by_label_contains,
         get_by_label_contains,
+        Node,
         (label: &'tree str),
         By::new().label_contains(label),
         #[doc = ""]
@@ -208,6 +190,7 @@ pub trait Queryable<'tree, 'node> {
         get_all_by_role_and_label,
         query_by_role_and_label,
         get_by_role_and_label,
+        Node,
         (role: accesskit::Role, label: &'tree str),
         By::new().role(role).label(label),
         #[doc = ""]
@@ -220,6 +203,7 @@ pub trait Queryable<'tree, 'node> {
         get_all_by_role,
         query_by_role,
         get_by_role,
+        Node,
         (role: accesskit::Role),
         By::new().role(role),
     );
@@ -230,6 +214,7 @@ pub trait Queryable<'tree, 'node> {
         get_all_by_value,
         query_by_value,
         get_by_value,
+        Node,
         (value: &'tree str),
         By::new().value(value),
     );
@@ -240,7 +225,8 @@ pub trait Queryable<'tree, 'node> {
         get_all_by,
         query_by,
         get_by,
-        (f: impl Fn(&Node<'_>) -> bool + 'tree),
+        Node,
+        (f: impl Fn(&AccessKitNode<'_>) -> bool + 'tree),
         By::new().predicate(f),
     );
 }
