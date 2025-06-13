@@ -7,7 +7,7 @@ mod basic_integration;
 
 use accesskit::Role;
 use basic_integration::Harness;
-use kittest::{by, Queryable};
+use kittest::{by, NodeT, Queryable};
 
 fn main() {
     let harness = make_tree();
@@ -45,8 +45,11 @@ fn main() {
         .next_back()
         .expect("No buttons found");
     assert_eq!(
-        btn_in_parent.parent_id().expect("No parent id"),
-        group.id(),
+        btn_in_parent
+            .accesskit_node()
+            .parent_id()
+            .expect("No parent id"),
+        group.accesskit_node().id(),
         "Button is not in the group"
     );
 
