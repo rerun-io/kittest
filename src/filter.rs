@@ -1,4 +1,4 @@
-use crate::Node;
+use crate::AccessKitNode;
 use accesskit::Role;
 use std::fmt::{Debug, Formatter};
 
@@ -15,7 +15,7 @@ pub struct By<'a> {
     label_contains: bool,
     include_labels: bool,
     #[allow(clippy::type_complexity)]
-    predicate: Option<Box<dyn Fn(&Node<'_>) -> bool + 'a>>,
+    predicate: Option<Box<dyn Fn(&AccessKitNode<'_>) -> bool + 'a>>,
     had_predicate: bool,
     role: Option<Role>,
     value: Option<&'a str>,
@@ -111,7 +111,7 @@ impl<'a> By<'a> {
     }
 
     /// Filter by a custom predicate.
-    pub fn predicate(mut self, predicate: impl Fn(&Node<'_>) -> bool + 'a) -> Self {
+    pub fn predicate(mut self, predicate: impl Fn(&AccessKitNode<'_>) -> bool + 'a) -> Self {
         self.predicate = Some(Box::new(predicate));
         self.had_predicate = true;
         self
@@ -162,7 +162,7 @@ impl<'a> By<'a> {
     /// Note: For correct filtering if [`Self::include_labels`] is false, the tree should be
     /// filtered like in [`crate::Queryable::query_all`].
     /// Note: Remember to check for recursive filtering
-    pub(crate) fn matches(&self, node: &Node<'_>) -> bool {
+    pub(crate) fn matches(&self, node: &AccessKitNode<'_>) -> bool {
         if let Some(label) = self.label {
             // In AccessKit, a widget with `Role::Label`, stores it's label in `Node::value`.
             let node_label = if node.role() == Role::Label {

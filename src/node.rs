@@ -1,191 +1,96 @@
-use crate::event::{Event, SimulatedEvent};
 use crate::query::Queryable;
-use crate::state::EventQueue;
-use crate::{by, ElementState, Key, MouseButton};
-use accesskit::{ActionRequest, Vec2};
+use crate::AccessKitNode;
 use std::fmt::{Debug, Formatter};
-use std::ops::Deref;
+use std::iter::once;
 
-/// A node in the accessibility tree. This should correspond to a widget or container in the GUI
-#[derive(Copy, Clone)]
-pub struct Node<'tree> {
-    node: accesskit_consumer::Node<'tree>,
-    pub(crate) queue: &'tree EventQueue,
-}
+pub trait NodeT<'tree>: Clone + Debug {
+    /// Provide access to the [`AccessKitNode`]
+    fn accesskit_node(&self) -> AccessKitNode<'tree>;
 
-impl Debug for Node<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut s = f.debug_struct("Node");
-        s.field("id", &self.node.id());
-        s.field("role", &self.node.role());
-        if let Some(label) = self.node.label() {
-            s.field("label", &label);
+    /// Construct a related (child / parent / sibling) node from the [`AccessKitNode`]
+    fn new_related(&self, child_node: AccessKitNode<'tree>) -> Self;
+
+    /// Iterate over the children of the node recursively
+    fn children_recursive(&self) -> Box<dyn Iterator<Item = Self> + 'tree>
+    where
+        Self: 'tree,
+    {
+        let node = self.clone();
+        Box::new(self.accesskit_node().children().flat_map(move |child| {
+            let child_node = node.new_related(child);
+            once(child_node.clone()).chain(child_node.children_recursive())
+        }))
+    }
+
+    /// Iterate over the direct children of the node
+    fn children(&self) -> impl Iterator<Item = Self> + 'tree
+    where
+        Self: 'tree,
+    {
+        let node = self.clone();
+        self.accesskit_node()
+            .children()
+            .map(move |child| node.new_related(child))
+    }
+
+    /// Iterate over the children of the node, either recursively or not
+    fn children_maybe_recursive(&self, recursive: bool) -> Box<dyn Iterator<Item = Self> + 'tree>
+    where
+        Self: 'tree,
+    {
+        if recursive {
+            self.children_recursive()
+        } else {
+            Box::new(self.children())
         }
-        if let Some(value) = self.node.value() {
-            s.field("value", &value);
-        }
-        if let Some(numeric) = self.node.numeric_value() {
-            s.field("numeric_value", &numeric);
-        }
-        s.field("focused", &self.node.is_focused());
-        s.field("hidden", &self.node.is_hidden());
-        s.field("disabled", &self.node.is_disabled());
-        if let Some(toggled) = self.node.toggled() {
-            s.field("toggled", &toggled);
-        }
-
-        let children = self
-            .query_all(by().recursive(false))
-            .collect::<Vec<Node<'_>>>();
-
-        s.field("children", &children);
-
-        s.finish()
-    }
-}
-
-/// We should probably add our own methods to query the node state but for now this should work
-impl<'tree> Deref for Node<'tree> {
-    type Target = accesskit_consumer::Node<'tree>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.node
-    }
-}
-
-impl<'tree> Node<'tree> {
-    /// Create a new node from an [`accesskit_consumer::Node`] and an [`EventQueue`]
-    pub(crate) fn new(node: accesskit_consumer::Node<'tree>, queue: &'tree EventQueue) -> Self {
-        Self { node, queue }
-    }
-
-    pub(crate) fn queue<'node>(&'node self) -> &'tree EventQueue {
-        self.queue
-    }
-
-    fn event(&self, event: Event) {
-        self.queue.lock().push(event);
-    }
-
-    /// Request focus for the node via accesskit
-    pub fn focus(&self) {
-        self.event(Event::ActionRequest(ActionRequest {
-            data: None,
-            action: accesskit::Action::Focus,
-            target: self.node.id(),
-        }));
-    }
-
-    /// Click the node via accesskit. This will trigger a [`accesskit::Action::Click`] action
-    pub fn click(&self) {
-        self.event(Event::ActionRequest(ActionRequest {
-            data: None,
-            action: accesskit::Action::Click,
-            target: self.node.id(),
-        }));
-    }
-
-    /// Hover the cursor at the node center
-    pub fn hover(&self) {
-        let rect = self.node.raw_bounds().expect("Node has no bounds");
-        let center = Vec2::new((rect.x0 + rect.x1) / 2.0, (rect.y0 + rect.y1) / 2.0);
-        self.event(Event::Simulated(SimulatedEvent::CursorMoved {
-            position: center,
-        }));
-    }
-
-    /// Simulate a click event at the node center
-    pub fn simulate_click(&self) {
-        self.hover();
-        ElementState::click().for_each(|state| {
-            self.event(Event::Simulated(SimulatedEvent::MouseInput {
-                button: MouseButton::Left,
-                state,
-            }));
-        });
-    }
-
-    /// Focus the node and type the given text
-    pub fn type_text(&self, text: impl Into<String>) {
-        self.focus();
-        self.event(Event::Simulated(SimulatedEvent::Ime(text.into())));
-    }
-
-    /// Press the given keys in combination
-    ///
-    /// For e.g. [`Key::Control`] + [`Key::A`] this would generate:
-    /// - Press [`Key::Control`]
-    /// - Press [`Key::A`]
-    /// - Release [`Key::A`]
-    /// - Release [`Key::Control`]
-    pub fn key_combination(&self, keys: &[Key]) {
-        self.focus();
-        for key in keys {
-            self.event(Event::Simulated(SimulatedEvent::KeyInput {
-                key: *key,
-                state: ElementState::Pressed,
-            }));
-        }
-        keys.iter().rev().for_each(|key| {
-            self.event(Event::Simulated(SimulatedEvent::KeyInput {
-                key: *key,
-                state: ElementState::Released,
-            }));
-        });
-    }
-
-    /// Press the given keys
-    /// For e.g. [`Key::Control`] + [`Key::A`] this would generate:
-    /// - Press [`Key::Control`]
-    /// - Release [`Key::Control`]
-    /// - Press [`Key::A`]
-    /// - Release [`Key::A`]
-    pub fn press_keys(&self, keys: &[Key]) {
-        self.focus();
-        for key in keys {
-            ElementState::click().for_each(|state| {
-                self.event(Event::Simulated(SimulatedEvent::KeyInput {
-                    key: *key,
-                    state,
-                }));
-            });
-        }
-    }
-
-    /// Press the given key
-    pub fn key_down(&self, key: Key) {
-        self.focus();
-        self.event(Event::Simulated(SimulatedEvent::KeyInput {
-            key,
-            state: ElementState::Pressed,
-        }));
-    }
-
-    /// Release the given key
-    pub fn key_up(&self, key: Key) {
-        self.focus();
-        self.event(Event::Simulated(SimulatedEvent::KeyInput {
-            key,
-            state: ElementState::Released,
-        }));
-    }
-
-    /// Press and release the given key
-    pub fn key_press(&self, key: Key) {
-        self.focus();
-        ElementState::click().for_each(|state| {
-            self.event(Event::Simulated(SimulatedEvent::KeyInput { key, state }));
-        });
     }
 
     /// Get the parent of the node
-    pub fn parent(&self) -> Option<Self> {
-        self.node.parent().map(|node| Node::new(node, self.queue))
+    fn parent(&self) -> Option<Self> {
+        self.accesskit_node()
+            .parent()
+            .map(|node| Self::new_related(self, node))
     }
 }
 
-impl<'t, 'n> Queryable<'t, 'n> for Node<'t> {
-    fn node(&'n self) -> Self {
-        Node::new(self.node, self.queue)
+impl<'tree, 'node, Node: NodeT<'tree> + 'tree> Queryable<'tree, 'node, Node> for Node {
+    fn queryable_node(&'node self) -> Node {
+        self.clone()
     }
+}
+
+/// A helper function to nicely format AccessKit nodes.
+///
+/// # Errors
+/// Returns an error if the formatting fails.
+pub fn debug_fmt_node<'tree, Node: NodeT<'tree> + 'tree>(
+    node: &Node,
+    f: &mut Formatter<'_>,
+) -> std::fmt::Result {
+    let accesskit_node = node.accesskit_node();
+
+    let mut s = f.debug_struct("Node");
+    s.field("id", &accesskit_node.id());
+    s.field("role", &accesskit_node.role());
+    if let Some(label) = accesskit_node.label() {
+        s.field("label", &label);
+    }
+    if let Some(value) = accesskit_node.value() {
+        s.field("value", &value);
+    }
+    if let Some(numeric) = accesskit_node.numeric_value() {
+        s.field("numeric_value", &numeric);
+    }
+    s.field("focused", &accesskit_node.is_focused());
+    s.field("hidden", &accesskit_node.is_hidden());
+    s.field("disabled", &accesskit_node.is_disabled());
+    if let Some(toggled) = accesskit_node.toggled() {
+        s.field("toggled", &toggled);
+    }
+
+    let children = node.children().collect::<Vec<_>>();
+
+    s.field("children", &children);
+
+    s.finish()
 }
