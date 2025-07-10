@@ -3,6 +3,9 @@ use crate::AccessKitNode;
 use std::fmt::{Debug, Formatter};
 use std::iter::once;
 
+/// A kittest node.
+///
+/// Implement this for your testing node type to make it work with kittest.
 pub trait NodeT<'tree>: Clone + Debug {
     /// Provide access to the [`AccessKitNode`]
     fn accesskit_node(&self) -> AccessKitNode<'tree>;
