@@ -5,7 +5,7 @@
 //! [1]: <https://github.com/emilk/egui/tree/master/crates/egui_kittest>
 
 use accesskit::{Action, ActionRequest};
-use kittest::{debug_fmt_node, AccessKitNode, NodeT, Queryable};
+use kittest::{AccessKitNode, NodeT, Queryable, debug_fmt_node};
 use parking_lot::Mutex;
 use std::fmt::{Debug, Formatter};
 use std::mem;
