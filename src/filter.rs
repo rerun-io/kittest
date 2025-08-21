@@ -1,6 +1,7 @@
 use crate::AccessKitNode;
 use accesskit::Role;
 use std::fmt::{Debug, Formatter};
+use std::sync::Arc;
 
 /// Create an empty filter.
 /// Convenience function for [`By::new`].
@@ -10,13 +11,13 @@ pub fn by<'a>() -> By<'a> {
 
 /// A filter for nodes.
 /// The filters are combined with a logical AND.
+#[derive(Clone)]
 pub struct By<'a> {
     label: Option<&'a str>,
     label_contains: bool,
     include_labels: bool,
     #[allow(clippy::type_complexity)]
-    predicate: Option<Box<dyn Fn(&AccessKitNode<'_>) -> bool + 'a>>,
-    had_predicate: bool,
+    predicate: Option<Arc<dyn Fn(&AccessKitNode<'_>) -> bool + 'a>>,
     role: Option<Role>,
     value: Option<&'a str>,
     pub(crate) recursive: bool,
@@ -29,7 +30,6 @@ impl Debug for By<'_> {
             label_contains,
             include_labels,
             predicate,
-            had_predicate,
             role,
             value,
             recursive,
@@ -45,7 +45,7 @@ impl Debug for By<'_> {
         if *include_labels {
             s.field("include_labels", &true);
         }
-        if predicate.is_some() || *had_predicate {
+        if predicate.is_some() {
             s.field("predicate", &"<function>");
         }
         if let Some(role) = role {
@@ -75,7 +75,6 @@ impl<'a> By<'a> {
             label_contains: false,
             include_labels: false,
             predicate: None,
-            had_predicate: false,
             role: None,
             value: None,
             recursive: true,
@@ -112,8 +111,7 @@ impl<'a> By<'a> {
 
     /// Filter by a custom predicate.
     pub fn predicate(mut self, predicate: impl Fn(&AccessKitNode<'_>) -> bool + 'a) -> Self {
-        self.predicate = Some(Box::new(predicate));
-        self.had_predicate = true;
+        self.predicate = Some(Arc::new(predicate));
         self
     }
 
@@ -139,23 +137,6 @@ impl<'a> By<'a> {
     /// Should the labels of labelled nodes be filtered?
     pub(crate) fn should_filter_labels(&self) -> bool {
         !self.include_labels && self.label.is_some()
-    }
-
-    /// Since we can't clone the predicate, we can't implement Clone for By.
-    /// Since we still need to clone By in some cases to show debug info, and since the predicate
-    /// can't be shown in debug info anyway, we just don't clone the predicate and
-    /// just remember if we had one.
-    pub(crate) fn debug_clone_without_predicate(&self) -> Self {
-        Self {
-            label: self.label,
-            label_contains: self.label_contains,
-            include_labels: self.include_labels,
-            predicate: None,
-            had_predicate: self.had_predicate,
-            role: self.role,
-            value: self.value,
-            recursive: self.recursive,
-        }
     }
 
     /// Returns true if the given node matches this filter.

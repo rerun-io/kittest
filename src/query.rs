@@ -46,7 +46,7 @@ fn get_all<'tree, Node: NodeT<'tree> + 'tree>(
     node: Node,
     by: By<'tree>,
 ) -> impl DoubleEndedIterator<Item = Node> + FusedIterator<Item = Node> + 'tree {
-    let debug_query = by.debug_clone_without_predicate();
+    let debug_query = by.clone();
     let mut iter = query_all(node.clone(), by).peekable();
     assert!(
         iter.peek().is_some(),
@@ -58,7 +58,7 @@ fn get_all<'tree, Node: NodeT<'tree> + 'tree>(
 #[allow(clippy::needless_pass_by_value)]
 #[track_caller]
 fn query<'tree, Node: NodeT<'tree> + 'tree>(node: Node, by: By<'tree>) -> Option<Node> {
-    let debug_query = by.debug_clone_without_predicate();
+    let debug_query = by.clone();
     let mut iter = query_all(node, by);
     let result = iter.next();
 
@@ -75,7 +75,7 @@ fn query<'tree, Node: NodeT<'tree> + 'tree>(node: Node, by: By<'tree>) -> Option
 #[allow(clippy::needless_pass_by_value)]
 #[track_caller]
 fn get<'tree, Node: NodeT<'tree> + 'tree>(node: Node, by: By<'tree>) -> Node {
-    let debug_query = by.debug_clone_without_predicate();
+    let debug_query = by.clone();
     let option = query(node.clone(), by);
     if let Some(node) = option {
         node
