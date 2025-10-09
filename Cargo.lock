@@ -135,7 +135,7 @@ dependencies = [
 
 [[package]]
 name = "kittest"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "accesskit 0.21.0",
  "accesskit_consumer",
