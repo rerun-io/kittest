@@ -4,7 +4,7 @@
 Full diff at https://github.com/rerun-io/kittest/compare/0.2.0..HEAD
 
 #### PRs
-* Make `By` clonable [#16](https://github.com/rerun-io/kittest/pull/16) by [@lucasmerlin](https://github.com/lucasmerlin)
+* Make `By` cloneable [#16](https://github.com/rerun-io/kittest/pull/16) by [@lucasmerlin](https://github.com/lucasmerlin)
 * Update accesskit to 0.21, accesskit_consumer to 0.30 [#15](https://github.com/rerun-io/kittest/pull/15) by [@DataTriny](https://github.com/DataTriny)
 * Update to Rust 2024 edition, bump MSRV to 1.85 [#14](https://github.com/rerun-io/kittest/pull/14) by [@DataTriny](https://github.com/DataTriny)
 
