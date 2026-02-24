@@ -1,5 +1,5 @@
 # Changelog
-## 0.3.0 - 2025-10-09 - Clonable `By` and accesskit 0.21
+## 0.3.0 - 2025-10-09 - Cloneable `By` and accesskit 0.21
 
 Full diff at https://github.com/rerun-io/kittest/compare/0.2.0..HEAD
 
