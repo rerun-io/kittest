@@ -101,13 +101,13 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: run
-          args: --example basic_integration
+          args: -p integration_example --bin basic_integration
 
       - name: Run querying example
         uses: actions-rs/cargo@v1
         with:
           command: run
-          args: --example querying
+          args: -p integration_example --bin querying
 
   # ---------------------------------------------------------------------------
 

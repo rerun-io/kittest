@@ -6,7 +6,7 @@ for testing user interfaces, with a focus on accessibility.
 
 This library is designed to be flexible and works with any GUI framework that supports AccessKit.
 Creating new **kittest** integrations is simple and straightforward. To get started, check out our 
-[basic integration example](https://github.com/rerun-io/kittest/blob/main/examples/basic_integration.rs).
+[basic integration example](./integration_example/src/bin/basic_integration.rs).
 
 ## Available Integrations
 - [egui_kittest](https://github.com/emilk/egui/tree/master/crates/egui_kittest): Official integration for 
@@ -39,4 +39,4 @@ fn main() {
 }
 ```
 
-Also see the [querying example](https://github.com/rerun-io/kittest/blob/4b3ecd2043bc6cd4b0460958f0ca0d8d81331841/examples/querying.rs).
+Also see the [querying example](./integration_example/src/bin/querying.rs).
