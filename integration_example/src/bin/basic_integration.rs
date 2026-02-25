@@ -15,7 +15,7 @@ pub struct Harness<'a> {
     /// A handle to the ui framework
     ctx: egui::Context,
     /// the ui component that should be tested (for egui that's just a closure).
-    app: Box<dyn FnMut(&egui::Context) + 'a>,
+    app: Box<dyn FnMut(&mut egui::Ui) + 'a>,
     /// The kittest State
     pub state: kittest::State,
     /// A queue of events that will be processed in the next frame.
@@ -24,11 +24,11 @@ pub struct Harness<'a> {
 }
 
 impl<'a> Harness<'a> {
-    pub fn new(mut app: impl FnMut(&egui::Context) + 'a) -> Self {
+    pub fn new(mut app: impl FnMut(&mut egui::Ui) + 'a) -> Self {
         let ctx = egui::Context::default();
         ctx.enable_accesskit();
 
-        let output = ctx.run(Default::default(), &mut app);
+        let output = ctx.run_ui(Default::default(), &mut app);
 
         Self {
             ctx,
@@ -46,7 +46,7 @@ impl<'a> Harness<'a> {
     pub fn run_frame(&mut self) {
         let events = mem::take(&mut *self.queued_events.lock());
 
-        let output = self.ctx.run(
+        let output = self.ctx.run_ui(
             egui::RawInput {
                 events,
                 ..Default::default()
@@ -119,10 +119,8 @@ impl EguiNode<'_> {
 
 fn main() {
     let mut checked = false;
-    let mut harness = Harness::new(|ctx| {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.checkbox(&mut checked, "Check me!");
-        });
+    let mut harness = Harness::new(|ui| {
+        ui.checkbox(&mut checked, "Check me!");
     });
 
     harness.get_by_label("Check me!").click();

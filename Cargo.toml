@@ -11,7 +11,7 @@ name = "kittest"
 publish = true
 readme = "README.md"
 repository = "https://github.com/rerun-io/kittest"
-rust-version = "1.85"
+rust-version = "1.92"
 version = "0.3.0"
 
 [package.metadata.docs.rs]
@@ -26,16 +26,19 @@ default = []
 [dependencies]
 accesskit_consumer = "0.30.0"
 accesskit = "0.21.0"
-parking_lot = "0.12"
 
-[dev-dependencies]
-egui = { version = "0.31.1", features = ["accesskit"] }
 
 [patch.crates-io]
 egui = { git = "https://github.com/emilk/egui", branch = "main" }
 
+# Uncomment if you want to use the local kittest to develop the example
+# kittest = { path = "." }
+
 [lints]
 workspace = true
+
+[workspace]
+members = ["integration_example"]
 
 
 [workspace.lints.rust]
