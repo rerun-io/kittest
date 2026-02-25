@@ -7,7 +7,7 @@ mod basic_integration;
 
 use accesskit::Role;
 use basic_integration::Harness;
-use kittest::{by, NodeT, Queryable};
+use kittest::{NodeT, Queryable, by};
 
 fn main() {
     let harness = make_tree();
