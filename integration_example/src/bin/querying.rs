@@ -36,7 +36,7 @@ fn main() {
     let _check_me = harness.get(by().role(Role::CheckBox).label_contains("Check"));
 
     // You can also query children of a node
-    let group = harness.get_by_role_and_label(Role::Label, "My Group");
+    let group = harness.get_by_role_and_label(Role::GenericContainer, "My Group");
     // get_by_label won't panic here since we only find the button in the group
     group.get_by_label("Duplicate");
 
@@ -59,30 +59,21 @@ fn main() {
 
 #[allow(clippy::let_underscore_must_use)]
 fn make_tree() -> Harness<'static> {
-    Harness::new(|ctx| {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            _ = ui.button("Button 1");
-            _ = ui.button("Button 2");
+    Harness::new(|ui| {
+        _ = ui.button("Button 1");
+        _ = ui.button("Button 2");
 
-            _ = ui.checkbox(&mut true, "Check me");
+        _ = ui.checkbox(&mut true, "Check me");
 
-            _ = ui.button("Duplicate");
+        _ = ui.button("Duplicate");
 
-            _ = ui.label("Submit");
-            _ = ui.button("Submit");
+        _ = ui.label("Submit");
+        _ = ui.button("Submit");
 
-            let group_label = ui.label("My Group");
-            _ = ui
-                .group(|ui| {
-                    // TODO(lucasmerlin): Egui should probably group widgets by their parent automatically
-                    ui.ctx()
-                        .clone()
-                        .with_accessibility_parent(group_label.id, || {
-                            _ = ui.button("Duplicate");
-                        });
-                })
-                .response
-                .labelled_by(group_label.id);
+        let group_label = ui.label("My Group");
+        _ = ui.group(|ui| {
+            ui.response().labelled_by(group_label.id);
+            ui.label("Duplicate");
         });
     })
 }
