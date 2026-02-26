@@ -165,16 +165,16 @@ impl<'a> By<'a> {
             }
         }
 
-        if let Some(predicate) = &self.predicate {
-            if !predicate(node) {
-                return false;
-            }
+        if let Some(predicate) = &self.predicate
+            && !predicate(node)
+        {
+            return false;
         }
 
-        if let Some(role) = self.role {
-            if node.role() != role {
-                return false;
-            }
+        if let Some(role) = self.role
+            && node.role() != role
+        {
+            return false;
         }
 
         if let Some(value) = self.value {

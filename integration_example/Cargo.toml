@@ -1,0 +1,14 @@
+[package]
+name = "integration_example"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# This intentionally doesn't use the local kittest, so we can avoid the cyclic dependency when updating accesskit / egui
+kittest = "0.3.0"
+egui = { version = "0.33.3", default-features = false }
+accesskit = "0.21.1"
+parking_lot = "0.12"
+
+[lints]
+workspace = true
