@@ -29,9 +29,9 @@ dependencies = [
 
 [[package]]
 name = "accesskit_consumer"
-version = "0.34.0"
+version = "0.35.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a191faf9cb278127e253ba80af4c588527b7b9d824c58220aca00bb162a5a460"
+checksum = "53cf47daed85312e763fbf85ceca136e0d7abc68e0a7e12abe11f48172bc3b10"
 dependencies = [
  "accesskit 0.24.0",
  "hashbrown 0.16.1",
@@ -221,7 +221,7 @@ name = "kittest"
 version = "0.3.0"
 dependencies = [
  "accesskit 0.24.0",
- "accesskit_consumer 0.34.0",
+ "accesskit_consumer 0.35.0",
 ]
 
 [[package]]
