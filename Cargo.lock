@@ -212,16 +212,8 @@ version = "0.1.0"
 dependencies = [
  "accesskit 0.21.1",
  "egui",
- "kittest 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kittest 0.3.0",
  "parking_lot",
-]
-
-[[package]]
-name = "kittest"
-version = "0.3.0"
-dependencies = [
- "accesskit 0.24.0",
- "accesskit_consumer 0.35.0",
 ]
 
 [[package]]
@@ -233,6 +225,14 @@ dependencies = [
  "accesskit 0.21.1",
  "accesskit_consumer 0.30.0",
  "parking_lot",
+]
+
+[[package]]
+name = "kittest"
+version = "0.4.0"
+dependencies = [
+ "accesskit 0.24.0",
+ "accesskit_consumer 0.35.0",
 ]
 
 [[package]]
