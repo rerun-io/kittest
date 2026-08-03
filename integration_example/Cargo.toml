@@ -4,11 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# `accesskit` is pinned separately from the one in the root `Cargo.toml`: this example follows the
+# `accesskit` version of released `egui`/`kittest`, which can lag behind what the `kittest` library itself uses.
+accesskit = "0.24.1"
+egui = { version = "0.35.0", default-features = false }
 # This intentionally doesn't use the local kittest, so we can avoid the cyclic dependency when updating accesskit / egui
-kittest = "0.3.0"
-egui = { version = "0.33.3", default-features = false }
-accesskit = "0.21.1"
-parking_lot = "0.12"
+kittest = "0.4.0"
+parking_lot = "0.12.5"
 
 [lints]
 workspace = true

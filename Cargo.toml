@@ -24,15 +24,17 @@ default = []
 
 
 [dependencies]
-accesskit_consumer = "0.35.0"
-accesskit = "0.24.0"
+accesskit = "0.24.1"
+accesskit_consumer = "0.38.0"
 
 
 [patch.crates-io]
-egui = { git = "https://github.com/emilk/egui", branch = "main" }
-
 # Uncomment if you want to use the local kittest to develop the example
 # kittest = { path = "." }
+
+# Uncomment to test the example against the latest egui.
+# Note that egui `main` often has a higher MSRV than the `rust-toolchain` here.
+# egui = { git = "https://github.com/emilk/egui", branch = "main" }
 
 [lints]
 workspace = true
