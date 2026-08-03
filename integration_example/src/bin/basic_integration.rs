@@ -105,12 +105,14 @@ impl<'tree> NodeT<'tree> for EguiNode<'tree> {
 
 impl EguiNode<'_> {
     pub fn click(&self) {
+        let (target_node, target_tree) = self.accesskit_node().locate();
         self.queue.lock().push(
             // You probably want to do mouse move, pointer down, pointer up here, but for
             // brevity, let's use the accesskit event.
             egui::Event::AccessKitActionRequest(ActionRequest {
                 action: Action::Click,
-                target: self.accesskit_node().id(),
+                target_tree,
+                target_node,
                 data: None,
             }),
         );
