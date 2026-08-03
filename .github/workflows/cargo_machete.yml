@@ -11,13 +11,13 @@ jobs:
   cargo-machete:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.95
-      - name: Machete install
-        ## The official cargo-machete action
-        uses: bnjbvr/cargo-machete@main
-      - name: Checkout
-        uses: actions/checkout@v4
+
       - name: Machete Check
-        run: cargo machete
+        ## The official cargo-machete action; installs and runs it
+        uses: bnjbvr/cargo-machete@v0.9.2
