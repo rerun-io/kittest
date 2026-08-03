@@ -2,12 +2,12 @@
 
 /// For this example we'll use the egui integration from the basic_integration example.
 /// This allows us to easily create a realistic tree.
-#[allow(dead_code)]
+#[expect(dead_code)]
 mod basic_integration;
 
 use accesskit::Role;
 use basic_integration::Harness;
-use kittest::{NodeT, Queryable, by};
+use kittest::{NodeT as _, Queryable as _, by};
 
 fn main() {
     let harness = make_tree();
@@ -57,7 +57,6 @@ fn main() {
     // harness.get_by_role(Role::Button); // This will panic!
 }
 
-#[allow(clippy::let_underscore_must_use)]
 fn make_tree() -> Harness<'static> {
     Harness::new(|ui| {
         _ = ui.button("Button 1");

@@ -16,7 +16,7 @@ pub struct By<'a> {
     label: Option<&'a str>,
     label_contains: bool,
     include_labels: bool,
-    #[allow(clippy::type_complexity)]
+    #[expect(clippy::type_complexity)]
     predicate: Option<Arc<dyn Fn(&AccessKitNode<'_>) -> bool + 'a>>,
     role: Option<Role>,
     value: Option<&'a str>,

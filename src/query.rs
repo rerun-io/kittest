@@ -3,7 +3,7 @@ use crate::{AccessKitNode, NodeT};
 use std::collections::BTreeSet;
 use std::iter::FusedIterator;
 
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 #[track_caller]
 fn query_all<'tree, Node: NodeT<'tree> + 'tree>(
     node: Node,
@@ -40,7 +40,7 @@ fn query_all<'tree, Node: NodeT<'tree> + 'tree>(
     })
 }
 
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 #[track_caller]
 fn get_all<'tree, Node: NodeT<'tree> + 'tree>(
     node: Node,
@@ -55,7 +55,6 @@ fn get_all<'tree, Node: NodeT<'tree> + 'tree>(
     iter
 }
 
-#[allow(clippy::needless_pass_by_value)]
 #[track_caller]
 fn query<'tree, Node: NodeT<'tree> + 'tree>(node: Node, by: By<'tree>) -> Option<Node> {
     let debug_query = by.clone();
@@ -72,7 +71,7 @@ fn query<'tree, Node: NodeT<'tree> + 'tree>(node: Node, by: By<'tree>) -> Option
     result
 }
 
-#[allow(clippy::needless_pass_by_value)]
+#[expect(clippy::needless_pass_by_value)]
 #[track_caller]
 fn get<'tree, Node: NodeT<'tree> + 'tree>(node: Node, by: By<'tree>) -> Node {
     let debug_query = by.clone();

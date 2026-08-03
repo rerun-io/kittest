@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------
 # Section identical to scripts/clippy_wasm/clippy.toml:
 
-msrv = "1.92"
+msrv = "1.95"
 
 allow-unwrap-in-tests = true
 
@@ -62,6 +62,7 @@ disallowed-types = [
 # Allow-list of words for markdown in docstrings https://rust-lang.github.io/rust-clippy/master/index.html#doc_markdown
 doc-valid-idents = [
   # You must also update the same list in `scripts/clippy_wasm/clippy.toml`!
+  "AccessKit",
   "GitHub",
   "GLB",
   "GLTF",

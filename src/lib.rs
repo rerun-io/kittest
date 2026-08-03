@@ -1,5 +1,4 @@
-#![allow(clippy::doc_markdown)]
-#![doc = include_str!("../README.md")]
+#![cfg_attr(doc, doc = include_str!("../README.md"))]
 mod filter;
 mod node;
 mod query;
