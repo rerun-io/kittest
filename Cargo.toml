@@ -24,8 +24,8 @@ default = []
 
 
 [dependencies]
-accesskit = "0.24.1"
-accesskit_consumer = "0.38.0"
+accesskit = "0.25.0"
+accesskit_consumer = "0.39.0"
 
 
 [patch.crates-io]

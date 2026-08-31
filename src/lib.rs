@@ -4,8 +4,8 @@ mod node;
 mod query;
 mod state;
 
-/// Re-export of the [`accesskit_consumer::Node`] with a more convenient name.
-pub use accesskit_consumer::Node as AccessKitNode;
+/// Re-export of the [`accesskit_consumer::NodeRef`] with a more convenient name.
+pub use accesskit_consumer::NodeRef as AccessKitNode;
 pub use filter::*;
 pub use node::*;
 pub use query::*;
