@@ -1,0 +1,29 @@
+[package]
+name = "kittest-snapshot"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "Framework-agnostic image snapshot testing for kittest-based harnesses"
+
+# Ported from `egui_kittest`'s snapshot/config modules so it can be reused by
+# any harness that produces `image::RgbaImage` frames (egui_kittest, the
+# kittest-winit prototype, etc.).
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+dify = { version = "0.8", default-features = false }
+toml = { version = "1", default-features = false, features = ["parse", "serde"] }
+serde = { version = "1", features = ["derive"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+open = { version = "5", optional = true }
+tempfile = { version = "3", optional = true }
+
+[features]
+default = []
+## Enables the `debug_open_snapshot` helper that writes to a temp file and
+## launches the OS's default image viewer. Keep it off in CI.
+debug = ["dep:open", "dep:tempfile"]
+
+[lints]
+workspace = true

@@ -1,0 +1,5 @@
+# Pin snapshot output to the `kittest-winit` crate regardless of which
+# directory `cargo run` is invoked from. Without this, `output_path` defaults
+# to `tests/snapshots` relative to cwd, which differs between running from
+# the workspace root vs. from `kittest-winit/`.
+output_path = "kittest-winit/tests/snapshots"

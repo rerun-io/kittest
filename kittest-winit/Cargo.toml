@@ -1,0 +1,50 @@
+[package]
+name = "kittest-winit"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "Prototype: framework-agnostic kittest harness on top of a synthetic winit 0.31 backend"
+
+[features]
+default = []
+# Pulls in `anyrender` and provides `CapturingWindowRenderer`, which lets any
+# framework that renders through `anyrender` capture frames into a test buffer.
+render = ["dep:anyrender"]
+
+[dependencies]
+# This intentionally doesn't use the local kittest path (to match integration_example's style
+# and avoid cyclic concerns). Kittest core is framework-agnostic already.
+kittest = { path = ".." }
+accesskit = "0.24"
+raw-window-handle = { version = "0.6", features = ["std"] }
+dpi = "0.1"
+cursor-icon = "1"
+
+# winit-core carries the dyn-compatible traits we synthesise (ActiveEventLoop, Window,
+# ApplicationHandler, EventLoopProxyProvider). We do not need the real winit::EventLoop.
+winit-core = { version = "=0.31.0-beta.2", default-features = false }
+
+# Optional — enables CapturingWindowRenderer. See `render` feature.
+anyrender = { version = "0.8", optional = true }
+
+[dev-dependencies]
+# For the blitz_app example. Points at a fork branch that adds a pluggable
+# accessibility backend (`CapturingAccessibilityBackend`) to blitz-shell so
+# tests can capture TreeUpdates instead of registering with the OS adapter.
+# Upstream tracking: https://github.com/dioxuslabs/blitz (kittest-harness
+# branch on https://github.com/lucasmerlin/blitz).
+winit = { version = "=0.31.0-beta.2", default-features = false }
+# Enable `system_fonts` so Blitz loads OS fonts via parley; otherwise text
+# (including button labels) renders as empty glyphs and the snapshot is blank.
+blitz-dom = { git = "https://github.com/lucasmerlin/blitz", branch = "kittest-harness", default-features = false, features = ["accessibility", "system_fonts"] }
+blitz-html = { git = "https://github.com/lucasmerlin/blitz", branch = "kittest-harness", default-features = false }
+blitz-traits = { git = "https://github.com/lucasmerlin/blitz", branch = "kittest-harness", default-features = false }
+blitz-shell = { git = "https://github.com/lucasmerlin/blitz", branch = "kittest-harness", default-features = false, features = ["accessibility"] }
+anyrender_vello_cpu = { version = "0.10", default-features = false }
+# The blitz_app example turns on `render` so it can use CapturingWindowRenderer.
+kittest-winit = { path = ".", features = ["render"] }
+kittest-snapshot = { path = "../kittest-snapshot" }
+
+[lints]
+workspace = true
+

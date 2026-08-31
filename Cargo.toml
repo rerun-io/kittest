@@ -38,7 +38,7 @@ egui = { git = "https://github.com/emilk/egui", branch = "main" }
 workspace = true
 
 [workspace]
-members = ["integration_example"]
+members = ["integration_example", "kittest-snapshot", "kittest-winit"]
 
 
 [workspace.lints.rust]
