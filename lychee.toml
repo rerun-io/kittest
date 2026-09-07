@@ -40,9 +40,9 @@ exclude_path = [
   "_deps/",
   ".pixi",
   "build",
-  "target_ra",
-  "target_wasm",
   "target",
+  "target_ra",   # legacy
+  "target_wasm", # legacy
   "venv",
 ]
 

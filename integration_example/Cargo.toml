@@ -1,7 +1,13 @@
 [package]
-name = "integration_example"
-version = "0.1.0"
+categories = ["development-tools::testing"]
+description = "Integration tests of released kittest against released egui"
 edition = "2024"
+keywords = ["accesskit", "egui", "kittest", "testing"]
+license = "MIT OR Apache-2.0"
+name = "integration_example"
+publish = false
+repository = "https://github.com/rerun-io/kittest"
+version = "0.1.0"
 
 [dependencies]
 # `accesskit` is pinned separately from the one in the root `Cargo.toml`: this example follows the

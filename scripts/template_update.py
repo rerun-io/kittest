@@ -32,7 +32,7 @@ DO_NOT_OVERWRITE = {
     "main.py",
     "pixi.lock",
     "README.md",
-    "requirements.txt",
+    "requirements.txt",  # Removed from template, but may contain important content in existing forks.
 }
 
 # Files required by C++, but not by _both_ Python and Rust
@@ -51,15 +51,15 @@ PYTHON_FILES = {
     ".github/workflows/python.yml",
     ".mypy.ini",
     "main.py",
+    "new_project_name/__init__.py",
     "pixi.lock",  # Pixi is only C++ & Python - For Rust we only use cargo
     "pixi.toml",  # Pixi is only C++ & Python - For Rust we only use cargo
     "pyproject.toml",
-    "requirements.txt",
 }
 
 # Files required by Rust, but not by _both_ C++ and Python
 RUST_FILES = {
-    ".github/workflows/cargo_machete.yml",
+    ".github/workflows/cargo_shear.yml",
     ".github/workflows/rust.yml",
     "bacon.toml",
     "Cargo.lock",
@@ -67,15 +67,16 @@ RUST_FILES = {
     "CHANGELOG.md",  # We only keep a changelog for Rust crates at the moment
     "clippy.toml",
     "Cranky.toml",
+    "crates/new_project_name/Cargo.toml",
+    "crates/new_project_name/src/",
+    "crates/new_project_name/src/lib.rs",
+    "crates/new_project_name/src/main.rs",
     "deny.toml",
     "RELEASES.md",
     "rust-toolchain",
     "scripts/clippy_wasm/",
     "scripts/clippy_wasm/clippy.toml",
     "scripts/generate_changelog.py",  # We only keep a changelog for Rust crates at the moment
-    "src/",
-    "src/lib.rs",
-    "src/main.rs",
 }
 
 # Files we used to have, but have been removed in never version of rerun_template
@@ -105,6 +106,12 @@ def init(languages: set[str], dry_run: bool) -> None:
     print("Removing all language-specific files not needed for languages {languages}.")
     files_to_delete = calc_deny_set(languages)
     delete_files_and_folder(files_to_delete, dry_run)
+    if languages == {"python"}:
+        print(
+            "\nYou initialized a pure-Python repo.\n"
+            "Consider merging pixi.toml into pyproject.toml for easier maintenance, see: "
+            "https://pixi.prefix.dev/latest/python/pyproject_toml/"
+        )
 
 
 def remove_file(filepath: str) -> None:
@@ -147,7 +154,7 @@ def update(languages: set[str], dry_run: bool) -> None:
 
                 if rel_path.startswith(".git/"):
                     continue
-                if rel_path.startswith("src/"):
+                if rel_path.startswith("crates/") or rel_path.startswith("src/"):
                     continue
                 if rel_path in files_to_ignore:
                     continue
