@@ -184,7 +184,6 @@ cast_sign_loss = "allow"
 default_trait_access = "allow"
 float_cmp = "allow"                          # exact float comparisons are usually intentional (`float_cmp_const` is still on)
 inline_always = "allow"                      # we know what we are doing
-items_after_statements = "allow"
 many_single_char_names = "allow"             # `r, g, b, a` and `h, s, v` are fine
 missing_panics_doc = "allow"
 must_use_candidate = "allow"                 # too many hits
@@ -193,9 +192,7 @@ return_self_not_must_use = "allow"
 similar_names = "allow"                      # too many false positives, e.g. `encoder`/`encoded`
 struct_excessive_bools = "allow"
 struct_field_names = "allow"
-trivially_copy_pass_by_ref = "allow"
 unreadable_literal = "allow"
-used_underscore_binding = "allow"
 
 manual_range_contains = "allow"       # this is better on 'allow'
 map_unwrap_or = "allow"               # this is better on 'allow'
