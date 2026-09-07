@@ -14,7 +14,7 @@
         },
         // Rust:
         {
-            "name": "Debug 'PROJ_NAME'",
+            "name": "Debug 'basic_integration'",
             "type": "lldb",
             "request": "launch",
             "cargo": {
@@ -22,7 +22,7 @@
                     "build"
                 ],
                 "filter": {
-                    "name": "PROJ_NAME",
+                    "name": "basic_integration",
                     "kind": "bin"
                 }
             },
