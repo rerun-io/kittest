@@ -17,8 +17,10 @@ target_wasm
 
 # Python stuff:
 __pycache__
+.ipynb_checkpoints/
 .mypy_cache
 .ruff_cache
+*.egg-info
 venv
 
 .idea
