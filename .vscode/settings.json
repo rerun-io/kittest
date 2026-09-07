@@ -14,7 +14,7 @@
     "rust-analyzer.check.overrideCommand": [
         "cargo",
         "clippy",
-        "--target-dir=target_ra",
+        "--target-dir=target/rust-analyzer",
         "--workspace",
         "--message-format=json",
         "--all-targets",
@@ -24,7 +24,7 @@
         "cargo",
         "clippy",
         "--quiet",
-        "--target-dir=target_ra",
+        "--target-dir=target/rust-analyzer",
         "--workspace",
         "--message-format=json",
         "--all-targets",
