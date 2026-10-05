@@ -259,7 +259,7 @@ version = "0.1.0"
 dependencies = [
  "accesskit 0.24.1",
  "egui",
- "kittest 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kittest 0.4.0",
  "parking_lot",
 ]
 
@@ -275,19 +275,19 @@ dependencies = [
 [[package]]
 name = "kittest"
 version = "0.4.0"
-dependencies = [
- "accesskit 0.25.0",
- "accesskit_consumer 0.39.0",
-]
-
-[[package]]
-name = "kittest"
-version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90ceaa75eb0036a32b6b9833962eb18137449e9817e2e586006471925b727fd5"
 dependencies = [
  "accesskit 0.24.1",
  "accesskit_consumer 0.35.0",
+]
+
+[[package]]
+name = "kittest"
+version = "0.5.0"
+dependencies = [
+ "accesskit 0.25.0",
+ "accesskit_consumer 0.39.0",
 ]
 
 [[package]]

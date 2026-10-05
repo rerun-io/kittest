@@ -1,4 +1,9 @@
 # Changelog
+## 0.5.0 - 2026-10-05
+
+* Update accesskit_consumer to 0.38, egui to 0.35 [#24](https://github.com/rerun-io/kittest/pull/24) by [@emilk](https://github.com/emilk)
+* Update MSRV to 1.95 and enable more clippy lints [#23](https://github.com/rerun-io/kittest/pull/23) by [@emilk](https://github.com/emilk)
+* Update accesskit to 0.25, accesskit_consumer to 0.39 [#26](https://github.com/rerun-io/kittest/pull/26) by [@DataTriny](https://github.com/DataTriny)
 
 ## 0.4.0 - 2026-03-24 - accesskit 0.24
 
