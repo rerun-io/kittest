@@ -16,6 +16,7 @@ pub struct By<'a> {
     label: Option<&'a str>,
     label_contains: bool,
     include_labels: bool,
+    include_text_runs: bool,
     #[expect(clippy::type_complexity)]
     predicate: Option<Arc<dyn Fn(&AccessKitNode<'_>) -> bool + 'a>>,
     role: Option<Role>,
@@ -29,6 +30,7 @@ impl Debug for By<'_> {
             label,
             label_contains,
             include_labels,
+            include_text_runs,
             predicate,
             role,
             value,
@@ -44,6 +46,9 @@ impl Debug for By<'_> {
         }
         if *include_labels {
             s.field("include_labels", &true);
+        }
+        if *include_text_runs {
+            s.field("include_text_runs", &true);
         }
         if predicate.is_some() {
             s.field("predicate", &"<function>");
@@ -74,6 +79,7 @@ impl<'a> By<'a> {
             label: None,
             label_contains: false,
             include_labels: false,
+            include_text_runs: false,
             predicate: None,
             role: None,
             value: None,
@@ -106,6 +112,18 @@ impl<'a> By<'a> {
     /// Default is false.
     pub fn include_labels(mut self) -> Self {
         self.include_labels = true;
+        self
+    }
+
+    /// When filtering by value, should [`Role::TextRun`] nodes be included in the results?
+    /// Default is false.
+    ///
+    /// A text input stores its text in its value, and so do the text runs below it,
+    /// which hold the same text line by line for screen readers.
+    /// Without this, a value query for the text of a single-line text input
+    /// finds only the text input, not its text run as well.
+    pub fn include_text_runs(mut self) -> Self {
+        self.include_text_runs = true;
         self
     }
 
@@ -178,6 +196,13 @@ impl<'a> By<'a> {
         }
 
         if let Some(value) = self.value {
+            // Text runs repeat the value of their text input, see `include_text_runs`.
+            if node.role() == Role::TextRun
+                && !self.include_text_runs
+                && self.role != Some(Role::TextRun)
+            {
+                return false;
+            }
             if let Some(node_value) = node.value() {
                 if node_value != value {
                     return false;

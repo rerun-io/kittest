@@ -216,6 +216,8 @@ pub trait Queryable<'tree, 'node, Node: NodeT<'tree> + 'tree> {
         Node,
         (value: &'tree str),
         By::new().value(value),
+        #[doc = ""]
+        #[doc = "Text runs (the lines of text below a text input) are not included in the results, see [`By::include_text_runs`]."]
     );
 
     impl_helper!(
